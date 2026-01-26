@@ -23,8 +23,8 @@ export default function Adoracao({ navigateTo }) {
             <TouchableOpacity onPress={() => navigateTo('Harpa')} style={{...styles.card, backgroundColor: "#FFFAE1",}}>             
               <Image source={require('../../assets/images/harpa-crista.jpg')} style={styles.image}/>
               <View style={{justifyContent: "center", paddingLeft: 15}}>
-                <Text style={{...styles.cardTitle, color: "#BA9D36"}}>Harpa Cristã</Text>
-                <Text style={{...styles.cardTxt, color: "#B8AB7D"}}>Encontre todos os hinos da Harpa {'\n'}Cristã e adore a Deus com alegria!</Text>
+                <Text style={{...styles.cardTitle, color: "#BA9D36"}}>Hinário</Text>
+                <Text style={{...styles.cardTxt, color: "#B8AB7D"}}>Encontre todos os seus hinos {'\n'}cristãos e adore a Deus com alegria!</Text>
               </View>              
             </TouchableOpacity> 
             

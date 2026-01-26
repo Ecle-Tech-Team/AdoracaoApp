@@ -2,6 +2,7 @@ import { View, StyleSheet } from 'react-native';
 import React, { useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
+import { HinarioProvider } from "./contexts/HinarioContext";
 import Login from './screens/login';
 import Cadastro from './screens/cadastro';
 import Dashboard from './screens/dashboard';
@@ -27,6 +28,7 @@ import GrupoReg from './screens/grupoReg';
 import GrupoComp from './screens/grupoComp';
 import HinarioReg from './screens/hinarioReg';
 import AdicionarHino from './screens/adicionarHino';
+import MudarHinario from './screens/mudarHinario';
 import HinarioComp from './screens/hinarioComp';
 import hinarioGrupo from './screens/hinoComp';
 import Componentes from './screens/componentes';
@@ -45,7 +47,7 @@ const userScreens = {
     dashboard: Dashboard,
     menuSuperior: MenuSuperiorAdorador,
     menuInferior: MenuInferiorAdorador,
-    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes],
+    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario],
   },
   Músico: {
     dashboard: Dashboard,
@@ -80,8 +82,8 @@ function Page() {
   const [selectedHino, setSelectedHino] = useState(null);
   const [selectedHinoGeral, setSelectedHinoGeral] = useState(null);
 
-  const navigateTo = (screen, hino = null, hinoGeral = null, previousScreenParam = null) => {
-    setSelectedHino(hino);
+  const navigateTo = (screen, item = null, hinoGeral = null, previousScreenParam = null) => {
+    setSelectedHino(item);
     setSelectedHinoGeral(hinoGeral);
     setPreviousScreen(previousScreenParam || currentScreen);
     setCurrentScreen(screen);
@@ -139,7 +141,9 @@ function Page() {
 export default function App() {
   return (
     <AuthProvider>
-      <Page />
+      <HinarioProvider>
+        <Page />
+      </HinarioProvider>
     </AuthProvider>
   );
 }

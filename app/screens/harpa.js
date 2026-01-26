@@ -2,29 +2,44 @@ import { StyleSheet, Text, View, FlatList, TouchableOpacity, TextInput, Image, A
 import React, { useEffect, useState, useContext } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold , Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchHinos, addFavorito, removeFavorito, fetchFavoritos } from '../api/api';
+import { fetchHinosByHinario, addFavorito, removeFavorito, fetchFavoritos } from '../api/api';
 import { AuthContext } from '../contexts/AuthContext';
+import { HinarioContext } from '../contexts/HinarioContext';
 
 export default function Harpa({ navigateTo }) {
   const { user } = useContext(AuthContext);
+  const { hinario } = useContext(HinarioContext);
   const [hinos, setHinos] = useState([]);
   const [filteredHinos, setFilteredHinos] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [favoritos, setFavoritos] = useState(new Set());
 
-  useEffect(() => {
-    const loadHinos = async () => {
-      try {
-        const data = await fetchHinos();
-        setHinos(data);
-        setFilteredHinos(data);
-      } catch (error) {
-        console.error('Erro ao carregar hinos:', error);
+ useEffect(() => {
+  const loadHinos = async () => {
+    try {
+      let data = [];
+
+      if (hinario === 'HARPA') {
+        data = await fetchHinosByHinario('harpa');
       }
-    };
-  
+
+      if (hinario === 'CCB') {
+        data = await fetchHinosByHinario('ccb');
+      }
+
+      if (hinario === 'CANTOR') {
+        data = await fetchHinosByHinario('cantor');
+      }
+
+      setHinos(data);
+      setFilteredHinos(data);
+    } catch (error) {
+      console.error('Erro ao carregar hinos:', error);
+    }
+  };
+
     loadHinos();
-  }, []);
+  }, [hinario]);
   
   useEffect(() => {    
   
@@ -98,6 +113,11 @@ export default function Harpa({ navigateTo }) {
     return null;
   }
 
+  const tipoHino =
+  hinario === 'HARPA' ? 'Harpa' :
+  hinario === 'CCB' ? 'CCB' :
+  'Cantor';
+
   return (
     <View style={styles.container}>      
       <View>
@@ -106,7 +126,11 @@ export default function Harpa({ navigateTo }) {
             <Text style={styles.backButton}>&#60;</Text>
           </TouchableOpacity>    
 
-          <Text style={{paddingLeft: 15, ...styles.h2}}>Harpa Cristã</Text>
+          <Text style={{ paddingLeft: 15, ...styles.h2 }}>
+            {hinario === 'HARPA' && 'Harpa Cristã'}
+            {hinario === 'CCB' && 'Hinário 5 CCB'}
+            {hinario === 'CANTOR' && 'Cantor Cristão'}
+          </Text>
         </View>
         
         <TextInput
@@ -121,11 +145,22 @@ export default function Harpa({ navigateTo }) {
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <View style={styles.hinoContainer}>
-              <TouchableOpacity style={styles.hinoTouchable} onPress={() => navigateTo('Hino', item)}>
+              <TouchableOpacity style={styles.hinoTouchable} onPress={() => {
+                console.log('HINO CLICADO:', item);
+                console.log('HINÁRIO ATUAL:', hinario);
+
+                navigateTo(
+                  'Hino', 
+                  item,
+                  
+                  'Harpa'
+                );
+              }}
+              >
                 <Text style={styles.item}>{item.numero} - {item.titulo}</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={() => toggleFavorito(item._id, 'Harpa')}>
+              <TouchableOpacity onPress={() => toggleFavorito(item._id, tipoHino)}>
                 <Image
                   source={favoritos.has(item._id) 
                     ? require('../../assets/icons/red-heart.png') 

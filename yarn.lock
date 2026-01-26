@@ -1590,34 +1590,34 @@
     nullthrows "^1.1.1"
     structured-headers "^0.4.1"
 
-"@expo/ngrok-bin-linux-x64@2.3.41":
-  version "2.3.41"
-  resolved "https://registry.npmjs.org/@expo/ngrok-bin-linux-x64/-/ngrok-bin-linux-x64-2.3.41.tgz"
-  integrity sha512-LcU3MbYHv7Sn2eFz8Yzo2rXduufOvX1/hILSirwCkH+9G8PYzpwp2TeGqVWuO+EmvtBe6NEYwgdQjJjN6I4L1A==
+"@expo/ngrok-bin-win32-x64@2.3.40":
+  version "2.3.40"
+  resolved "https://registry.npmjs.org/@expo/ngrok-bin-win32-x64/-/ngrok-bin-win32-x64-2.3.40.tgz"
+  integrity sha512-a8xtUxX/Ftp2ho+/+VR5GCg0ttP9MNzYj58TVjfiKMkl4mVrbFVIzEinRzmy7PhiOWxqGQSCOdzEfa6C2G4nEA==
 
-"@expo/ngrok-bin@2.3.42":
-  version "2.3.42"
-  resolved "https://registry.npmjs.org/@expo/ngrok-bin/-/ngrok-bin-2.3.42.tgz"
-  integrity sha512-kyhORGwv9XpbPeNIrX6QZ9wDVCDOScyTwxeS+ScNmUqYoZqD9LRmEqF7bpDh5VonTsrXgWrGl7wD2++oSHcaTQ==
+"@expo/ngrok-bin@2.3.40":
+  version "2.3.40"
+  resolved "https://registry.npmjs.org/@expo/ngrok-bin/-/ngrok-bin-2.3.40.tgz"
+  integrity sha512-40GK1CY1QLPDHSQS7Fd36CJeZgMwtbeezkgp4tzfExVRVtWw30jOBCsM7TBB9IqEmmX7C/XwG47scMQHCnMw8A==
   optionalDependencies:
-    "@expo/ngrok-bin-darwin-arm64" "2.3.41"
-    "@expo/ngrok-bin-darwin-x64" "2.3.41"
-    "@expo/ngrok-bin-freebsd-ia32" "2.3.41"
-    "@expo/ngrok-bin-freebsd-x64" "2.3.41"
-    "@expo/ngrok-bin-linux-arm" "2.3.41"
-    "@expo/ngrok-bin-linux-arm64" "2.3.41"
-    "@expo/ngrok-bin-linux-ia32" "2.3.41"
-    "@expo/ngrok-bin-linux-x64" "2.3.41"
-    "@expo/ngrok-bin-sunos-x64" "2.3.41"
-    "@expo/ngrok-bin-win32-ia32" "2.3.41"
-    "@expo/ngrok-bin-win32-x64" "2.3.41"
+    "@expo/ngrok-bin-darwin-arm64" "2.3.40"
+    "@expo/ngrok-bin-darwin-x64" "2.3.40"
+    "@expo/ngrok-bin-freebsd-ia32" "2.3.40"
+    "@expo/ngrok-bin-freebsd-x64" "2.3.40"
+    "@expo/ngrok-bin-linux-arm" "2.3.40"
+    "@expo/ngrok-bin-linux-arm64" "2.3.40"
+    "@expo/ngrok-bin-linux-ia32" "2.3.40"
+    "@expo/ngrok-bin-linux-x64" "2.3.40"
+    "@expo/ngrok-bin-sunos-x64" "2.3.40"
+    "@expo/ngrok-bin-win32-ia32" "2.3.40"
+    "@expo/ngrok-bin-win32-x64" "2.3.40"
 
-"@expo/ngrok@^4.1.3":
-  version "4.1.3"
-  resolved "https://registry.npmjs.org/@expo/ngrok/-/ngrok-4.1.3.tgz"
-  integrity sha512-AESYaROGIGKWwWmUyQoUXcbvaUZjmpecC5buArXxYou+RID813F8T0Y5jQ2HUY49mZpYfJiy9oh4VSN37GgrXA==
+"@expo/ngrok@^4.1.0":
+  version "4.1.0"
+  resolved "https://registry.npmjs.org/@expo/ngrok/-/ngrok-4.1.0.tgz"
+  integrity sha512-PrtWxBt/SnOF1jZkf7oWznhEPFrmYKKeJPLVRKnEBd/y4eUYfoiNIXOzflIzhdrMubjWVI+pFuPJ6nkjVL95/Q==
   dependencies:
-    "@expo/ngrok-bin" "2.3.42"
+    "@expo/ngrok-bin" "2.3.40"
     got "^11.5.1"
     uuid "^3.3.2"
     yaml "^1.10.0"
@@ -3875,13 +3875,6 @@ encodeurl@~1.0.2:
   resolved "https://registry.npmjs.org/encodeurl/-/encodeurl-1.0.2.tgz"
   integrity sha512-TPJXq8JqFaVYm2CWmPvnP2Iyo4ZSM7/QKcSmuMLDObfpH5fi7RUGmd/rTDf+rut/saiDiQEeVTNgAmJEdAOx0w==
 
-encoding@^0.1.0:
-  version "0.1.13"
-  resolved "https://registry.npmjs.org/encoding/-/encoding-0.1.13.tgz"
-  integrity sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==
-  dependencies:
-    iconv-lite "^0.6.2"
-
 end-of-stream@^1.1.0:
   version "1.4.4"
   resolved "https://registry.npmjs.org/end-of-stream/-/end-of-stream-1.4.4.tgz"
@@ -4751,13 +4744,6 @@ hyphenate-style-name@^1.0.3:
   version "1.0.4"
   resolved "https://registry.npmjs.org/hyphenate-style-name/-/hyphenate-style-name-1.0.4.tgz"
   integrity sha512-ygGZLjmXfPHj+ZWh6LwbC37l43MhfztxetbFCoYTM2VjkIUpeHgSNn7QIyVFj7YQ1Wl9Cbw5sholVJPzWvC2MQ==
-
-iconv-lite@^0.6.2:
-  version "0.6.3"
-  resolved "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz"
-  integrity sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==
-  dependencies:
-    safer-buffer ">= 2.1.2 < 3.0.0"
 
 iconv-lite@0.4.24:
   version "0.4.24"
@@ -7118,7 +7104,7 @@ safe-json-stringify@~1:
   resolved "https://registry.npmjs.org/safe-json-stringify/-/safe-json-stringify-1.2.0.tgz"
   integrity sha512-gH8eh2nZudPQO6TytOvbxnuhYBOvDBBLW52tz5q6X58lJcd/tkmqFR+5Z9adS8aJtURSXWThWy/xJtJwixErvg==
 
-"safer-buffer@>= 2.1.2 < 3", "safer-buffer@>= 2.1.2 < 3.0.0", safer-buffer@~2.1.0:
+"safer-buffer@>= 2.1.2 < 3", safer-buffer@~2.1.0:
   version "2.1.2"
   resolved "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==

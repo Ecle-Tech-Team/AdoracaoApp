@@ -10,7 +10,7 @@ const formatText = (text, style = styles.textLine) => {
   ));
 };
 
-export default function Hino({ selectedHino, navigateTo, previousScreen }) {
+export default function Hino({ selectedHino, hinario, navigateTo, previousScreen }) {
   const [fontLoaded] = useFonts({
     Nunito_500Medium,
     Nunito_700Bold,
@@ -21,7 +21,7 @@ export default function Hino({ selectedHino, navigateTo, previousScreen }) {
     return null;
   }
 
-  if (!selectedHino) {
+  if (!selectedHino ) {
     return (
       <View style={styles.container}>
         <Text>Hino não encontrado.</Text>
@@ -29,32 +29,34 @@ export default function Hino({ selectedHino, navigateTo, previousScreen }) {
     );
   }
 
-  const { titulo, coro, verses } = selectedHino;
+  const { numero, titulo, coro } = selectedHino ;
+  const verses = selectedHino.verses || selectedHino.versos;
 
   return (
-    <View style={styles.container}>              
+     <View style={styles.container}>              
       <View style={styles.titleContainer}>
         <TouchableOpacity onPress={() => navigateTo(previousScreen || 'Harpa')}>
           <Text style={styles.backButton}>&#60;</Text>
         </TouchableOpacity>    
 
-        <Text style={{paddingLeft: 15, ...styles.h2}}>Harpa Cristã</Text>
+        <Text style={{ paddingLeft: 15, ...styles.h2 }}>
+          {numero} - {titulo}
+        </Text>
       </View>
-        <ScrollView style={styles.box}>                          
-          <Text style={styles.title}>{selectedHino.numero} - {titulo}</Text>
 
-          {Object.entries(verses).map(([key, verse], index) => (
-            <View key={index} style={styles.verseContainer}>
-              {formatText(verse)}
-              {index === 0 && coro && (
-                <View style={styles.coroContainer}>
-                  {formatText(coro, styles.coro)}
-                </View>)}
-            </View>
-          ))}
-        </ScrollView>
+      <ScrollView style={styles.box}>                           
+        {verses && Object.entries(verses).map(([key, verse], index) => (
+          <View key={index} style={styles.verseContainer}>
+            {formatText(verse)}
 
-        
+            {index === 0 && coro && (
+              <View style={styles.coroContainer}>
+                {formatText(coro, styles.coro)}
+              </View>
+            )}
+          </View>
+        ))}
+      </ScrollView>
     </View>
   )
 }
@@ -117,6 +119,7 @@ const styles = StyleSheet.create({
     marginBottom: 10
   },
   verseContainer: {
+    paddingTop:20,
     marginBottom: 10, 
   },
 

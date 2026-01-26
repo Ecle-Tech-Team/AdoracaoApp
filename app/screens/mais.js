@@ -4,7 +4,7 @@ import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
 import { AuthContext } from '../contexts/AuthContext';
 
-export default function Mais() {
+export default function Mais({ navigateTo }) {
   const { logout } = useContext(AuthContext);
   const [fontLoaded] = useFonts({
     Nunito_500Medium,
@@ -33,8 +33,8 @@ export default function Mais() {
               <Text style={styles.txt}>Notificações</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.item} activeOpacity={0.7}>
-              <Text style={styles.txt}>Mudar Harpa</Text>
+            <TouchableOpacity onPress={() => navigateTo('MudarHinario')} style={styles.item} activeOpacity={0.7}>
+              <Text style={styles.txt}>Mudar Hinário</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={logout} style={styles.item} activeOpacity={0.7}>

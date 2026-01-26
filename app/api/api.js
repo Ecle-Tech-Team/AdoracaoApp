@@ -1,9 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://10.0.3.2:3333',
+  baseURL: 'http://localhost:3333',
   timeout: 10000
 });
+
+/* =========================
+   AUTH
+========================= */
 
 export const registerUser = async () => {
   const response = await api.post('/user');
@@ -11,199 +15,179 @@ export const registerUser = async () => {
 };
 
 export const userLogin = async (loginUser) => {
-  try {
-    const response = await axios.post(
-      'http://10.0.3.2:3333/login', 
-      loginUser,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );    
-    return response.data; 
-  } catch (error) {
-    throw error;
-  }
+  const response = await api.post('/login', loginUser, {
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.data;
 };
 
+/* =========================
+   HINÁRIOS (HARPA / CCB)
+========================= */
 
-export const fetchHinos = async () => {
+/**
+ * Busca todos os hinos de um hinário específico
+ * Ex: harpa | ccb
+ */
+export const fetchHinosByHinario = async (hinario) => {
   try {
-    const response = await api.get('/hinosHarpa');
+    const response = await api.get(`/hinos/${hinario}`);
     return response.data;
   } catch (error) {
-    console.error('Erro ao obter hinos:', error);
+    console.error(`Erro ao buscar hinos do hinário ${hinario}:`, error);
     throw error;
   }
 };
 
-export const fetchHinoByNumero = async (numero) => {
+/**
+ * Busca hino por número dentro de um hinário
+ */
+export const fetchHinoByNumero = async (hinario, numero) => {
   try {
-    const response = await api.get('/hinosHarpa/${numero}');
+    const response = await api.get(`/hinos/${hinario}/numero/${numero}`);
     return response.data;
   } catch (error) {
-    console.error('Erro ao obter hino:', error);
+    console.error('Erro ao buscar hino por número:', error);
     throw error;
   }
 };
+
+/**
+ * Busca hino por ID dentro de um hinário
+ */
+export const fetchHinoById = async (hinario, id) => {
+  try {
+    const response = await api.get(`/hinos/${hinario}/id/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar hino por ID:', error);
+    throw error;
+  }
+};
+
+/* =========================
+   HINÁRIO GERAL (LEGADO)
+========================= */
 
 export const fetchHinosGeral = async () => {
   try {
     const response = await api.get('/hinario');
     return response.data;
   } catch (error) {
-    console.error('Erro ao obter hinos:', error);
+    console.error('Erro ao obter hinário geral:', error);
     throw error;
   }
 };
 
-export const fetchHinarioGrupo = async (id_grupo) => {
+export const fetchHinoGeralById = async (id) => {
   try {
-    const response = await api.get(`/grupo/${id_grupo}/hinos`);
+    const response = await api.get(`/hinario/${id}`);
     return response.data;
   } catch (error) {
-    console.error('Erro ao obter hinos do grupo:', error);
+    console.error('Erro ao obter hino geral por ID:', error);
     throw error;
   }
+};
+
+/* =========================
+   GRUPOS / HINOS
+========================= */
+
+export const fetchHinarioGrupo = async (id_grupo) => {
+  const response = await api.get(`/grupo/${id_grupo}/hinos`);
+  return response.data;
 };
 
 export const removeHinoFromGrupo = async (id_grupo, id_hino) => {
-  try {
-    const response = await api.delete(`/grupo/${id_grupo}/hinos/${id_hino}`);
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao remover hino do grupo:', error);
-    throw error;
-  }
+  const response = await api.delete(`/grupo/${id_grupo}/hinos/${id_hino}`);
+  return response.data;
 };
 
+/* =========================
+   USUÁRIOS / COMPONENTES
+========================= */
+
 export const fetchUsuariosParaComponentes = async () => {
-  try {
-    const response = await api.get('/user/componentes');
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao buscar usuários para componentes:', error);
-    throw error;
-  }
+  const response = await api.get('/user/componentes');
+  return response.data;
 };
 
 export const fetchComponentes = async (id_grupo) => {
-  try {
-    const response = await api.get(`/user/grupo/${id_grupo}/componentes`);
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao buscar usuários para componentes:', error);
-    throw error;
-  }
+  const response = await api.get(`/user/grupo/${id_grupo}/componentes`);
+  return response.data;
 };
 
 export const removeComponentFromGrupo = async (idUser) => {
-  try {
-    const response = await api.put(`user/removeComponente/${idUser}`);
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao remover hino do grupo:', error);
-    throw error;
-  }
+  const response = await api.put(`/user/removeComponente/${idUser}`);
+  return response.data;
 };
+
+/* =========================
+   ENSAIOS
+========================= */
 
 export const fetchEnsaiosDoGrupo = async (id_grupo) => {
-  try {
-    const response = await api.get(`ensaios/${id_grupo}`);
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao buscar ensaios do grupo:', error);
-    throw error;
-  }
+  const response = await api.get(`/ensaios/${id_grupo}`);
+  return response.data;
 };
 
-export const createEnsaio = async (id_grupo, data, descricao, local, hinoIds) => {
-  try {
-    const response = await api.post(`ensaios/${id_grupo}`, {
-      data,
-      descricao,
-      local,
-      hinoIds: hinoIds || []
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao criar ensaio:', error);
-    throw error;
-  }
+export const createEnsaio = async (id_grupo, data, descricao, local, hinoIds = []) => {
+  const response = await api.post(`/ensaios/${id_grupo}`, {
+    data,
+    descricao,
+    local,
+    hinoIds
+  });
+  return response.data;
 };
 
 export const removeEnsaio = async (id) => {
-  try {
-    const response = await api.delete(`ensaios/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao deletar ensaio:', error);
-    throw error;
-  }
+  const response = await api.delete(`/ensaios/${id}`);
+  return response.data;
 };
+
+/* =========================
+   EVENTOS
+========================= */
 
 export const fetchEventosDoGrupo = async (id_grupo) => {
-  try {
-    const response = await api.get(`eventos/${id_grupo}`);
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao buscar ensaios do grupo:', error);
-    throw error;
-  }
+  const response = await api.get(`/eventos/${id_grupo}`);
+  return response.data;
 };
 
-export const createEvento = async (id_grupo, data, descricao, local, hinoIds) => {
-  try {
-    const response = await api.post(`eventos/${id_grupo}`, {
-      data,
-      descricao,
-      local,
-      hinoIds: hinoIds || []
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao criar ensaio:', error);
-    throw error;
-  }
+export const createEvento = async (id_grupo, data, descricao, local, hinoIds = []) => {
+  const response = await api.post(`/eventos/${id_grupo}`, {
+    data,
+    descricao,
+    local,
+    hinoIds
+  });
+  return response.data;
 };
 
 export const removeEvento = async (id) => {
-  try {
-    const response = await api.delete(`eventos/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error('Erro ao deletar ensaio:', error);
-    throw error;
-  }
+  const response = await api.delete(`/eventos/${id}`);
+  return response.data;
 };
 
+/* =========================
+   FAVORITOS
+========================= */
+
 export const addFavorito = async (id_user, hinoId, tipo_hino) => {
-  try {
-    const response = await api.post(`/favoritos/${id_user}`, { hinoId, tipo_hino });
-    return response.data;
-  } catch (error) {
-    console.error('❌ Erro ao adicionar favorito:', error.response?.data || error.message);
-    throw error;
-  }
+  const response = await api.post(`/favoritos/${id_user}`, {
+    hinoId,
+    tipo_hino
+  });
+  return response.data;
 };
 
 export const fetchFavoritos = async (id_user) => {
-  try {
-    const response = await api.get(`/favoritos/${id_user}`);
-    return response.data;  
-  } catch (error) {
-    console.error('Erro ao carregar favoritos:', error);
-    throw error;
-  }
+  const response = await api.get(`/favoritos/${id_user}`);
+  return response.data;
 };
 
 export const removeFavorito = async (id_user, hinoId) => {
-  try {
-    const response = await api.delete(`/favoritos/${id_user}/${hinoId}`);
-    return response.data;  
-  } catch (error) {
-    console.error('Erro ao remover favorito:', error);
-    throw error;
-  }
+  const response = await api.delete(`/favoritos/${id_user}/${hinoId}`);
+  return response.data;
 };
