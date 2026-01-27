@@ -53,25 +53,25 @@ const userScreens = {
     dashboard: Dashboard,
     menuSuperior: MenuSuperiorAdorador,
     menuInferior: MenuInferiorAdorador,
-    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes],
+    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario],
   },
   Cantor: {
     dashboard: DashboardCantor,
     MenuSuperior: MenuSuperiorAdorador,
     menuInferior: MenuInferiorAdorador,
-    screens: [EventosCantor, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes],
+    screens: [EventosCantor, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario],
   },
   Regente: {
     dashboard: DashboardGrupo,
     menuSuperior: MenuSuperiorGrupo,
     menuInferior: MenuInferiorReg,
-    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, EnsaiosReg,AdicionarEnsaio, EventosReg, AdicionarEvento, GrupoReg, HinarioReg, hinarioGrupo, AdicionarHino, Componentes, AdicionarComp, Adoracao, Pesquisa, Favoritos, MaisReg, CriarGrupo, Notificacoes],
+    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, EnsaiosReg,AdicionarEnsaio, EventosReg, AdicionarEvento, GrupoReg, HinarioReg, hinarioGrupo, AdicionarHino, Componentes, AdicionarComp, Adoracao, Pesquisa, Favoritos, MaisReg, CriarGrupo, Notificacoes, MudarHinario],
   },
   Componente: {
     dashboard: DashboardGrupo,
     menuSuperior: MenuSuperiorGrupo,
     menuInferior: MenuInferiorComp,
-    screens: [EnsaiosComp, EventosComp, GrupoComp, HinarioComp, hinarioGrupo, Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, MaisComp, Notificacoes],
+    screens: [EnsaiosComp, EventosComp, GrupoComp, HinarioComp, hinarioGrupo, Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, MaisComp, Notificacoes, MudarHinario],
   },
 };
 

@@ -113,10 +113,7 @@ export default function Harpa({ navigateTo }) {
     return null;
   }
 
-  const tipoHino =
-  hinario === 'HARPA' ? 'Harpa' :
-  hinario === 'CCB' ? 'CCB' :
-  'Cantor';
+  const tipoHino = hinario;
 
   return (
     <View style={styles.container}>      
@@ -145,14 +142,10 @@ export default function Harpa({ navigateTo }) {
           keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <View style={styles.hinoContainer}>
-              <TouchableOpacity style={styles.hinoTouchable} onPress={() => {
-                console.log('HINO CLICADO:', item);
-                console.log('HINÁRIO ATUAL:', hinario);
-
+              <TouchableOpacity style={styles.hinoTouchable} onPress={() => {           
                 navigateTo(
                   'Hino', 
-                  item,
-                  
+                  item,                  
                   'Harpa'
                 );
               }}

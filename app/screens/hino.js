@@ -1,27 +1,34 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useFonts, Nunito_700Bold, Nunito_500Medium } from '@expo-google-fonts/nunito';
-import { Poppins_700Bold } from '@expo-google-fonts/poppins';
-import { fetchHinoByNumero } from '../api/api';
+import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
 
 const formatText = (text, style = styles.textLine) => {
+  if (!text) return null;
+
   return text.split('<br>').map((line, index) => (
     <Text key={index} style={style}>{line.trim()}</Text>
   ));
 };
 
-export default function Hino({ selectedHino, hinario, navigateTo, previousScreen }) {
+const TITULO_POR_TIPO = {
+  HARPA: 'Harpa Cristã',
+  CCB: 'Hinário 5 CCB',
+  CANTOR: 'Cantor Cristão',
+  GERAL: 'Hinos Cristãos'
+};
+
+export default function Hino({ selectedHino, navigateTo, previousScreen }) {
   const [fontLoaded] = useFonts({
     Nunito_500Medium,
     Nunito_700Bold,
-    Poppins_700Bold    
-  })
+    Poppins_700Bold,
+    Poppins_600SemiBold
+  });
 
-  if (!fontLoaded) {
-    return null;
-  }
+  if (!fontLoaded) return null;
 
-  if (!selectedHino ) {
+  if (!selectedHino) {
     return (
       <View style={styles.container}>
         <Text>Hino não encontrado.</Text>
@@ -29,22 +36,36 @@ export default function Hino({ selectedHino, hinario, navigateTo, previousScreen
     );
   }
 
-  const { numero, titulo, coro } = selectedHino ;
+  const { numero, titulo, coro, autor, tipo_hino } = selectedHino;
   const verses = selectedHino.verses || selectedHino.versos;
 
+  const isHinario = !!numero;
+  const tituloPrincipal = TITULO_POR_TIPO[tipo_hino] || 'Hinos Cristãos';
+
   return (
-     <View style={styles.container}>              
+    <View style={styles.container}>
+      {/* HEADER */}
       <View style={styles.titleContainer}>
         <TouchableOpacity onPress={() => navigateTo(previousScreen || 'Harpa')}>
           <Text style={styles.backButton}>&#60;</Text>
-        </TouchableOpacity>    
+        </TouchableOpacity>
 
         <Text style={{ paddingLeft: 15, ...styles.h2 }}>
-          {numero} - {titulo}
+          {tituloPrincipal}
         </Text>
       </View>
 
-      <ScrollView style={styles.box}>                           
+      {/* CONTEÚDO */}
+      <ScrollView style={styles.box}>
+        {/* TÍTULO */}
+        <Text style={styles.title}>
+          {isHinario ? `${numero} - ${titulo}` : titulo}
+        </Text>
+
+        {/* AUTOR */}
+        {autor && <Text style={styles.autor}>{autor}</Text>}
+
+        {/* VERSOS */}
         {verses && Object.entries(verses).map(([key, verse], index) => (
           <View key={index} style={styles.verseContainer}>
             {formatText(verse)}
@@ -58,17 +79,17 @@ export default function Hino({ selectedHino, hinario, navigateTo, previousScreen
         ))}
       </ScrollView>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,   
-    marginBottom: 60   
+    flex: 1,
+    marginBottom: 60
   },
   h2: {
     fontSize: 24,
-    fontFamily: 'Poppins_700Bold'    
+    fontFamily: 'Poppins_700Bold'
   },
   box: {
     backgroundColor: '#FFFAE1',
@@ -81,8 +102,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Poppins_700Bold',
     color: '#BA9D36',
-    marginBottom: 20,
     marginTop: 15
+  },
+  autor: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#BA9D36'
   },
   backButton: {
     fontSize: 28,
@@ -102,17 +127,16 @@ const styles = StyleSheet.create({
     lineHeight: 17
   },
   coro: {
-    fontSize: 15,    
+    fontSize: 15,
     marginBottom: 3,
     marginTop: 3,
     color: '#BA9D36',
-    fontFamily: 'Poppins_700Bold' 
+    fontFamily: 'Poppins_700Bold'
   },
-  titleContainer:{
-    display: 'flex',
+  titleContainer: {
     flexDirection: 'row',
     paddingVertical: 10,
-    paddingLeft: 10,
+    paddingLeft: 10
   },
   coroContainer: {
     marginTop: 10,
@@ -120,7 +144,6 @@ const styles = StyleSheet.create({
   },
   verseContainer: {
     paddingTop:20,
-    marginBottom: 10, 
-  },
-
-})
+    marginBottom: 10
+  }
+});
