@@ -1,5 +1,7 @@
-import { StyleSheet, Image, Text, View, TextInput, Picker, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, Image, Text, View, TextInput, TouchableOpacity, Alert } from 'react-native';
 import React, { useState } from 'react';
+import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { registerUser } from '../api/api';
@@ -10,6 +12,8 @@ export default function Cadastro({ navigateTo }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [typeUser, settypeUser] = useState('');
+  const [birthDate, setBirthDate] = useState(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [fontLoaded] = useFonts({
     Nunito_500Medium,
@@ -20,8 +24,24 @@ export default function Cadastro({ navigateTo }) {
     return null;
   }
 
+  const onChangeDate = (event, selectedDate) => {
+  setShowDatePicker(false);
+  if (selectedDate) {
+    setBirthDate(selectedDate);
+  }
+};
   
   const handleRegister = () => {
+    if (!name || !email || !password || !confirmPassword) {
+      Alert.alert("Erro", "Preencha todos os campos");
+      return;
+    }
+
+    if (!typeUser) {
+      Alert.alert("Erro", "Selecione o tipo de usuário");
+      return;
+    }
+
     if (password !== confirmPassword) {
       Alert.alert("Erro", "As senhas não coincidem");
       return;
@@ -32,6 +52,9 @@ export default function Cadastro({ navigateTo }) {
       email,
       password,
       typeUser,
+      birthDate: birthDate
+        ? birthDate.toISOString().split('T')[0]
+        : null,
     };
 
     registerUser(createUser)
@@ -63,6 +86,31 @@ export default function Cadastro({ navigateTo }) {
               value={name}
               onChangeText={setName}
             />
+          </View>
+
+          <View style={{ paddingTop: 12 }}>
+            <Text style={styles.h3}>Data de nascimento</Text>
+
+            <TouchableOpacity
+              style={styles.input}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Text>
+                {birthDate
+                  ? birthDate.toLocaleDateString('pt-BR')
+                  : 'Selecione sua data de nascimento'}
+              </Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+              <DateTimePicker
+                value={birthDate || new Date()}
+                mode="date"
+                display="calendar"
+                maximumDate={new Date()}
+                onChange={onChangeDate}
+              />
+            )}
           </View>
 
           <View style={{paddingTop: 12}}>
@@ -109,11 +157,11 @@ export default function Cadastro({ navigateTo }) {
               <Picker.Item label="Adorador" value="Adorador" />
               <Picker.Item label="Regente" value="Regente" />
               <Picker.Item label="Cantor" value="Cantor" />
-              <Picker.Item label="Músico" value="Músico" />             
+              <Picker.Item label="Músico" value="Musico" />             
             </Picker>            
           </View>
 
-          <TouchableOpacity style={styles.btn} activeOpacity={0.7} onPress={handleRegister}>Cadastrar</TouchableOpacity>
+          <TouchableOpacity style={styles.btn} activeOpacity={0.7} onPress={handleRegister}><Text>Cadastrar</Text></TouchableOpacity>
 
           <View style={{textAlign: 'center', paddingTop: 20}}>
             <Text style={styles.h3}>Ao se cadastrar você estará concordando com os termos de politica e privacidade!</Text>
@@ -169,7 +217,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 12,
     borderColor: '#FFCB69',
-    color: '#FFCB69',
+    color: '#000',
     fontFamily: 'Nunito_500Medium',
   },
   btn: {
@@ -185,6 +233,6 @@ const styles = StyleSheet.create({
   }, 
   span: {
     color: '#FFCB69',
-    fontFamily: 'Poppins_700Bold'    
+    fontFamily: 'Poppins_700Bold',    
   }
 })

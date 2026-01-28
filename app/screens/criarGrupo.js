@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Picker, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert } from 'react-native';
+//import { Picker } from '@react-native-picker/picker';
 import React, { useState, useContext } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold } from '@expo-google-fonts/poppins';
@@ -11,7 +12,7 @@ export default function CriarGrupo({ navigateTo}) {
       
     const [groupName, setGroupName] = useState('');
     const [groupLocal, setGroupLocal] = useState('');
-    const [groupType, setGroupType] = useState('');
+    const [groupType, setGroupType] = useState('Louvor');
 
     const [fontLoaded] = useFonts({
         Nunito_500Medium,
@@ -24,22 +25,25 @@ export default function CriarGrupo({ navigateTo}) {
   
     const handleCreateGroup = async () => {
       try {
-        const response = await axios.post('http://localhost:3333/grupo', {
+        const response = await axios.post('https://adoracao-api-production.up.railway.app/grupo', {
           name: groupName,
           local: groupLocal,
-          typeGroup: groupType,
+          typeGroup: 'Louvor',
           regenteId, 
         });
 
         const newGrupoId = response.data.grupoId;
         console.log("Novo grupoId recebido:", newGrupoId);
         saveGrupoId(newGrupoId);  
+        console.log('saveGrupoId:', saveGrupoId);
 
         Alert.alert('Sucesso', response.data.message);
         setGroupName('');
         setGroupLocal('');
-        setGroupType('');
+        setGroupType('Louvor');
+        
         navigateTo('GrupoReg')
+        console.log('navigateTo:', navigateTo);
       } catch (error) {
         if (error.response && error.response.status === 400) {
             Alert.alert('Aviso', error.response.data.message);
@@ -74,7 +78,7 @@ export default function CriarGrupo({ navigateTo}) {
                 onChangeText={setGroupLocal}
                 style={styles.input}
             />
-            <Picker                
+            {/* <Picker                
                 selectedValue={groupType}
                 onValueChange={(itemValue) => setGroupType(itemValue)}
                 style={{...styles.input, fontSize: 13, borderStyle: 'solid'}}
@@ -82,7 +86,7 @@ export default function CriarGrupo({ navigateTo}) {
                 <Picker.Item label="Selecione o tipo de grupo" value=""/>
                 <Picker.Item label="Louvor" value="Louvor" />
                 <Picker.Item label="Musical" value="Musical" />
-            </Picker>
+            </Picker> */}
             <TouchableOpacity onPress={handleCreateGroup} style={styles.submitButton}>
                 <Text style={styles.submitButtonText}>Salvar Grupo</Text>
             </TouchableOpacity>
@@ -131,7 +135,7 @@ export default function CriarGrupo({ navigateTo}) {
       borderWidth: 2,
       borderRadius: 12,
       borderColor: '#FFCB69',
-      color: '#FFCB69',
+      color: '#000',
       marginBottom: 15,
       fontFamily: 'Nunito_500Medium',
     },

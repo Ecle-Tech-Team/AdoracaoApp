@@ -27,7 +27,7 @@ export default function AdicionarComp({ navigateTo }) {
 
   const adicionarComponenteAoGrupo = async (idUser, id_grupo) => {
     try {
-      const response = await axios.post(`http://localhost:3333/user/addComponente/${idUser}/${id_grupo}`);
+      const response = await axios.post(`https://adoracao-api-production.up.railway.app/user/addComponente/${idUser}/${id_grupo}`);
       return response.data;      
     } catch (error) {
       console.error('Erro ao adicionar componente ao grupo:', error);

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3333',
+  baseURL: 'https://adoracao-api-production.up.railway.app',
   timeout: 10000
 });
 
@@ -9,8 +9,8 @@ const api = axios.create({
    AUTH
 ========================= */
 
-export const registerUser = async () => {
-  const response = await api.post('/user');
+export const registerUser = async (userData) => {
+  const response = await api.post('/user', userData);
   return response.data;
 };
 

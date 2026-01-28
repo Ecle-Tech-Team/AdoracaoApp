@@ -34,8 +34,8 @@ export default function MaisReg({ navigateTo }) {
               <Text style={styles.txt}>Criar Grupo</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.item} activeOpacity={0.7}>
-              <Text style={styles.txt}>Mudar Harpa</Text>
+            <TouchableOpacity onPress={() => navigateTo('MudarHinario')} style={styles.item} activeOpacity={0.7}>
+              <Text style={styles.txt}>Mudar Hinário</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={logout} style={styles.item} activeOpacity={0.7}>
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   txt: {
     fontSize: 14,
     fontFamily: 'Poppins_600SemiBold',
-    color: '#ffff',
+    color: '#fff',
     lineHeight: 14
   },
   item: {

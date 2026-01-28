@@ -2,26 +2,41 @@ import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity } from 'r
 import React, { useState, useEffect } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchHinos, fetchHinosGeral } from '../api/api';
+import { fetchHinosByHinario, fetchHinosGeral } from '../api/api';
 
-const removeAccents = (str) => {
-  return str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
-};
+const removeAccents = (str) =>
+  str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';
 
 export default function Pesquisa({ navigateTo }) {
   const [searchText, setSearchText] = useState('');
-  const [hinosHarpa, setHinosHarpa] = useState([]);
-  const [hinarioGeral, setHinarioGeral] = useState([]);
+  const [todosHinos, setTodosHinos] = useState([]);
   const [filteredHinos, setFilteredHinos] = useState([]);
 
   useEffect(() => {
     const loadHinos = async () => {
       try {
-        const hinosHarpaData = await fetchHinos();
-        const hinarioGeralData = await fetchHinosGeral();
-        setHinosHarpa(hinosHarpaData);
-        setHinarioGeral(hinarioGeralData);
-        setFilteredHinos([...hinosHarpaData, ...hinarioGeralData]);
+        // 🔹 TODOS OS HINÁRIOS
+        const harpa = await fetchHinosByHinario('harpa');
+        const ccb = await fetchHinosByHinario('ccb');
+
+        // 🔹 HINOS GERAIS
+        const geral = await fetchHinosGeral();
+
+        // 🔹 Normaliza os dados
+        const hinosHinarios = [...harpa, ...ccb].map(h => ({
+          ...h,
+          tipo_hino: 'hinario'
+        }));
+
+        const hinosGerais = geral.map(h => ({
+          ...h,
+          tipo_hino: 'geral'
+        }));
+
+        const all = [...hinosHinarios, ...hinosGerais];
+
+        setTodosHinos(all);
+        setFilteredHinos(all);
       } catch (error) {
         console.error('Erro ao carregar hinos:', error);
       }
@@ -31,13 +46,17 @@ export default function Pesquisa({ navigateTo }) {
   }, []);
 
   useEffect(() => {
-    const filtered = [...hinosHarpa, ...hinarioGeral].filter(hino =>
-      (hino.titulo && removeAccents(hino.titulo.toLowerCase()).includes(removeAccents(searchText.toLowerCase()))) || 
-      (hino.numero && hino.numero.toString().includes(searchText))
+    const filtered = todosHinos.filter(hino =>
+      hino.titulo &&
+      removeAccents(hino.titulo.toLowerCase()).includes(
+        removeAccents(searchText.toLowerCase())
+      ) ||
+      (hino.tipo_hino === 'hinario' &&
+        hino.numero?.toString().includes(searchText))
     );
+
     setFilteredHinos(filtered);
-  }, [searchText, hinosHarpa, hinarioGeral]);
-  
+  }, [searchText, todosHinos]);
 
   const handleSelectHino = (hino) => {
     navigateTo('Hino', hino, 'Pesquisa');
@@ -49,19 +68,15 @@ export default function Pesquisa({ navigateTo }) {
     Poppins_600SemiBold
   });
 
-  if (!fontLoaded) {
-    return null;
-  }
+  if (!fontLoaded) return null;
 
   return (
     <View>
-      <View>
-        <Text style={{paddingLeft: 15, ...styles.h2}}>Pesquisa</Text> 
+      <Text style={{ paddingLeft: 15, ...styles.h2 }}>Pesquisa</Text>
 
-        <View>
-        <TextInput
+      <TextInput
         style={styles.searchBar}
-        placeholder="&#x1F50D; Buscar hino..."
+        placeholder="🔍 Buscar hino..."
         value={searchText}
         onChangeText={setSearchText}
       />
@@ -69,26 +84,33 @@ export default function Pesquisa({ navigateTo }) {
       {filteredHinos.length > 0 ? (
         <FlatList
           data={filteredHinos}
-          keyExtractor={(item) => item._id || item.numero.toString()}
+          keyExtractor={(item, index) =>
+            item._id ? item._id : `geral-${index}`
+          }
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.hinoItem} onPress={() => handleSelectHino(item)}>
-              <Text style={styles.hinoText}>{item.numero} - {item.titulo}</Text>
+            <TouchableOpacity
+              style={styles.hinoItem}
+              onPress={() => handleSelectHino(item)}
+            >
+              <Text style={styles.hinoText}>
+                {item.tipo_hino === 'hinario'
+                  ? `${item.numero} - ${item.titulo}`
+                  : `${item.titulo}${item.autor ? ` · ${item.autor}` : ''}`}
+              </Text>
             </TouchableOpacity>
           )}
         />
       ) : (
         <Text style={styles.noResults}>Nenhum hino encontrado.</Text>
-      )}  
-        </View>       
-      </View>
+      )}
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   h2: {
     fontSize: 24,
-    fontFamily: 'Poppins_700Bold',  
+    fontFamily: 'Poppins_700Bold'
   },
   searchBar: {
     padding: 18,
@@ -104,7 +126,7 @@ const styles = StyleSheet.create({
     padding: 18,
     borderRadius: 10,
     backgroundColor: '#FFFAE1',
-    marginBottom: 10,
+    marginBottom: 10
   },
   hinoText: {
     fontFamily: 'Poppins_600SemiBold',
@@ -117,4 +139,4 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: '#B8AB7D'
   }
-})
+});

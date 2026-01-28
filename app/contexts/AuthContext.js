@@ -50,19 +50,17 @@ export const AuthProvider = ({ children }) => {
     AsyncStorage.removeItem('grupoId');
   };
 
-  // const saveGrupoId = async (id) => {
-  //   try {      
-  //     await AsyncStorage.setItem('grupoId', id.toString());
-  //     setGrupoId(id); 
-  //   } catch (error) {
-  //     console.error('Erro ao salvar grupoId no AsyncStorage:', error);
-  //   }
-  // };
-
-  
+  const saveGrupoId = async (id) => {
+    try {      
+      await AsyncStorage.setItem('grupoId', id.toString());
+      setGrupoId(id); 
+    } catch (error) {
+      console.error('Erro ao salvar grupoId no AsyncStorage:', error);
+    }
+  };  
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, setGrupoId, id_grupo }}>
+    <AuthContext.Provider value={{ user, login, logout, setGrupoId, id_grupo, saveGrupoId }}>
       {children}
     </AuthContext.Provider>
   );

@@ -18,11 +18,17 @@ export default function AdicionarHino({ navigateTo }) {
       const loadHinarioGrupo = async () => {
         try {
           const existingHinos = await fetchHinarioGrupo(id_grupo);
-          setHinosExistentes(existingHinos.map(hino => hino._id)); // Armazena apenas os IDs dos hinos
+
+          // ✅ GARANTIA DE ARRAY
+          const safeHinos = Array.isArray(existingHinos) ? existingHinos : [];
+
+          setHinosExistentes(safeHinos.map(hino => hino._id));
         } catch (error) {
           console.error('Erro ao carregar o hinário do grupo:', error);
+          setHinosExistentes([]);
         }
       };
+
   
       // Carrega todos os hinos disponíveis para adição
       const loadHinos = async () => {
@@ -41,7 +47,7 @@ export default function AdicionarHino({ navigateTo }) {
     
     const addHinoToGrupo = async (id_grupo, hinoId) => {
       try {
-        const response = await axios.post(`http://localhost:3333/grupo/${id_grupo}/hinos`, { hinoId });
+        const response = await axios.post(`https://adoracao-api-production.up.railway.app/grupo/${id_grupo}/hinos`, { hinoId });
         return response.data;
       } catch (error) {
         console.error('Erro ao adicionar hino ao grupo:', error);

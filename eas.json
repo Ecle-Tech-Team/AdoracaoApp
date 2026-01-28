@@ -5,15 +5,23 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://adoracao-api-production.up.railway.app"
+      }
     },
     "preview": {
       "distribution": "internal",
-      "android": {
-        "buildType": "apk"
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://adoracao-api-production.up.railway.app"
       }
     },
-    "production": {}
+    "production": {
+      "distribution": "store",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://adoracao-api-production.up.railway.app"
+      }
+    }
   },
   "submit": {
     "production": {}

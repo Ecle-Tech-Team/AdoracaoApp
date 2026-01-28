@@ -15,8 +15,9 @@ export default function HinarioComp({ navigateTo }) {
     const getHinario = async () => {
       try {
         const data = await fetchHinarioGrupo(id_grupo);
-        setHinosGrupo(data);
-        setFilteredHinos(data); 
+        const safeData = Array.isArray(data) ? data : [];
+        setHinosGrupo(safeData);
+        setFilteredHinos(safeData); 
       } catch (error) {
         console.error('Erro ao obter hinos:', error);
       }

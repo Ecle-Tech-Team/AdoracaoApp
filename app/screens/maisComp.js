@@ -5,7 +5,7 @@ import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins
 import { fetchComponentes, removeComponentFromGrupo } from '../api/api';
 import { AuthContext } from '../contexts/AuthContext';
 
-export default function MaisComp() {  
+export default function MaisComp({ navigateTo }) {  
   const [componentes, setComponentes] = useState([]);
   const [idUser, setidUser] = useState(null);
   const { id_grupo, user, logout } = useContext(AuthContext);
@@ -72,8 +72,8 @@ export default function MaisComp() {
               <Text style={styles.itemText}>Sair do Grupo</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.item} activeOpacity={0.7}>
-              <Text style={styles.itemText}>Mudar Harpa</Text>
+            <TouchableOpacity onPress={() => navigateTo('MudarHinario')} style={styles.item} activeOpacity={0.7}>
+              <Text style={styles.itemText}>Mudar Hinário</Text>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={logout} style={styles.item} activeOpacity={0.7}>

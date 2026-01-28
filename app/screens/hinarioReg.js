@@ -16,40 +16,52 @@ export default function HinarioReg({ navigateTo }) {
     const getHinario = async () => {
       try {
         const data = await fetchHinarioGrupo(id_grupo);
-        setHinosGrupo(data);
-        setFilteredHinos(data); 
+
+        // ✅ GARANTIA DE ARRAY
+        const safeData = Array.isArray(data) ? data : [];
+
+        setHinosGrupo(safeData);
+        setFilteredHinos(safeData);
       } catch (error) {
         console.error('Erro ao obter hinos:', error);
+        setHinosGrupo([]);
+        setFilteredHinos([]);
       }
     };
-    getHinario();
-    
+
+    if (id_grupo) {
+      getHinario();
+    }
   }, [id_grupo]);
+
 
   const handleRemoveHino = async (id_hino) => {
     try {
       await removeHinoFromGrupo(id_grupo, id_hino);
       Alert.alert('Sucesso', 'Hino removido do grupo com sucesso!');
-      setHinosGrupo(hinosGrupo.filter(hino => hino._id !== id_hino));
+
+      const updated = hinosGrupo.filter(hino => hino._id !== id_hino);
+      setHinosGrupo(updated);
+      setFilteredHinos(updated);
     } catch (error) {
       Alert.alert('Erro', 'Erro ao remover hino do grupo.');
       console.error(error);
     }
   };
+
   
   const removeAccents = (str) => {
     return str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "") : '';
   };
 
   useEffect(() => {
-    const filtered = hinosGrupo.filter(hino => 
-      removeAccents(hino.titulo && hino.titulo.toLowerCase()).includes(removeAccents(searchText.toLowerCase()))
-
+    const filtered = hinosGrupo.filter(hino =>
+      removeAccents(hino?.titulo?.toLowerCase() || '')
+        .includes(removeAccents(searchText.toLowerCase()))
     );
-    setFilteredHinos(filtered);
-  }, [searchText, hinosGrupo]);
-  
 
+    setFilteredHinos(filtered);
+  }, [searchText, hinosGrupo]); 
 
   const [fontLoaded] = useFonts({
     Nunito_500Medium,

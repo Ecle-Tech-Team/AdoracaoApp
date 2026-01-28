@@ -89,7 +89,7 @@ export default function Login({ navigateTo }) {
 
 const styles = StyleSheet.create({
   main: {
-    paddingTop: 120,
+    paddingTop: 100,
     display: 'flex',
     justifyContent: 'center',
     paddingHorizontal: 20
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 12,
     borderColor: '#FFCB69',
-    color: '#FFCB69',
+    color: '#000',
     fontFamily: 'Nunito_500Medium',
   },
   btn: {

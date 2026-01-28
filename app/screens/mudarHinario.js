@@ -48,8 +48,7 @@ export default function MudarHinario({ navigateTo }) {
             style={{
               ...styles.hinoText,
               fontFamily: "Nunito_500Medium",
-              color: "#FFCB69",
-              fontSize: "12px",
+              color: "#FFCB69"              
             }}
           >
             Português (Brasil){" "}
