@@ -3,6 +3,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { HinarioProvider } from "./contexts/HinarioContext";
+import { SectionProvider } from "./contexts/SectionContext";
 import Login from './screens/login';
 import Cadastro from './screens/cadastro';
 import Dashboard from './screens/dashboard';
@@ -11,8 +12,9 @@ import DashboardGrupo from './screens/dashboardGrupo';
 import Adoracao from './screens/adoracao';
 import Harpa from './screens/harpa';
 import Hino from './screens/hino';
-import Hinario from './screens/hinario'; 
+import Hinario from './screens/hinario';
 import HinoGeral from './screens/hinoGeral';
+import HymnsSection from './screens/HymnsSection';
 import Pesquisa from './screens/pesquisa';
 import Favoritos from './screens/favoritos';
 import Mais from './screens/mais';
@@ -47,31 +49,31 @@ const userScreens = {
     dashboard: Dashboard,
     menuSuperior: MenuSuperiorAdorador,
     menuInferior: MenuInferiorAdorador,
-    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario],
+    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection],
   },
   Músico: {
     dashboard: Dashboard,
     menuSuperior: MenuSuperiorAdorador,
     menuInferior: MenuInferiorAdorador,
-    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario],
+    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection],
   },
   Cantor: {
     dashboard: DashboardCantor,
     MenuSuperior: MenuSuperiorAdorador,
     menuInferior: MenuInferiorAdorador,
-    screens: [EventosCantor, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario],
+    screens: [EventosCantor, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection],
   },
   Regente: {
     dashboard: DashboardGrupo,
     menuSuperior: MenuSuperiorGrupo,
     menuInferior: MenuInferiorReg,
-    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, EnsaiosReg,AdicionarEnsaio, EventosReg, AdicionarEvento, GrupoReg, HinarioReg, hinarioGrupo, AdicionarHino, Componentes, AdicionarComp, Adoracao, Pesquisa, Favoritos, MaisReg, CriarGrupo, Notificacoes, MudarHinario],
+    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, EnsaiosReg,AdicionarEnsaio, EventosReg, AdicionarEvento, GrupoReg, HinarioReg, hinarioGrupo, AdicionarHino, Componentes, AdicionarComp, Adoracao, Pesquisa, Favoritos, MaisReg, CriarGrupo, Notificacoes, MudarHinario, HymnsSection],
   },
   Componente: {
     dashboard: DashboardGrupo,
     menuSuperior: MenuSuperiorGrupo,
     menuInferior: MenuInferiorComp,
-    screens: [EnsaiosComp, EventosComp, GrupoComp, HinarioComp, hinarioGrupo, Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, MaisComp, Notificacoes, MudarHinario],
+    screens: [EnsaiosComp, EventosComp, GrupoComp, HinarioComp, hinarioGrupo, Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, MaisComp, Notificacoes, MudarHinario, HymnsSection],
   },
 };
 
@@ -142,7 +144,9 @@ export default function App() {
   return (
     <AuthProvider>
       <HinarioProvider>
-        <Page />
+        <SectionProvider>
+          <Page />
+        </SectionProvider>
       </HinarioProvider>
     </AuthProvider>
   );
