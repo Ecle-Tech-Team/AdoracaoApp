@@ -47,7 +47,7 @@ export default function AdicionarHino({ navigateTo }) {
     
     const addHinoToGrupo = async (id_grupo, hinoId) => {
       try {
-        const response = await axios.post(`https://adoracao-api-production.up.railway.app/grupo/${id_grupo}/hinos`, { hinoId });
+        const response = await axios.post(`https://api.adoracaoapp.com.br/grupo/${id_grupo}/hinos`, { hinoId });
         return response.data;
       } catch (error) {
         console.error('Erro ao adicionar hino ao grupo:', error);

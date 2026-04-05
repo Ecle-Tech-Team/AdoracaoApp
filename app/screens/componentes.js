@@ -25,7 +25,7 @@ export default function Componentes({ navigateTo }) {
 
   const handleRemove = async (id_usuario) => {
     try {
-      const response = await fetch(`http://localhost:3333/user/removeComponente/${id_usuario}`, {
+      const response = await fetch(`https://api.adoracaoapp.com.br/user/removeComponente/${id_usuario}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

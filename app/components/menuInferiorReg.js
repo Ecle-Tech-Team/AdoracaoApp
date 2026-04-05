@@ -1,39 +1,30 @@
-import { StyleSheet, Image, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import React from 'react';
+import { Home, BookOpenText, Search, Users, MoreHorizontal } from 'lucide-react';
 
 export default function MenuInferiorReg({ navigateTo }) {
   return (
     <View style={styles.container}>
       <View style={styles.main}>
-        <View>
-          <TouchableOpacity onPress={() => navigateTo('Dashboard')} style={styles.option} activeOpacity={0.7}>            
-              <Image source={require('../../assets/icons/inicio.png')} style={styles.image}/>                      
-          </TouchableOpacity>
-        </View>                
+        <TouchableOpacity onPress={() => navigateTo('Dashboard')} style={styles.option} activeOpacity={0.7}>
+          <Home size={28} fill='#fff' color="#fff" />
+        </TouchableOpacity>
 
-        <View>        
-          <TouchableOpacity onPress={() => navigateTo('Adoracao')} style={styles.option} activeOpacity={0.7}>            
-            <Image source={require('../../assets/icons/adoracao.png')} style={{...styles.image, height: 48}}/>                        
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => navigateTo('Adoracao')} style={styles.option} activeOpacity={0.7}>
+          <BookOpenText size={32} color="#fff" />
+        </TouchableOpacity>
 
-        <View>
-          <TouchableOpacity onPress={() => navigateTo('Pesquisa')} style={styles.option} activeOpacity={0.7}>            
-            <Image source={require('../../assets/icons/lupa.png')} style={styles.image}/>                
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => navigateTo('Pesquisa')} style={styles.option} activeOpacity={0.7}>
+          <Search size={28} color="#fff" />
+        </TouchableOpacity>
 
-        <View>
-          <TouchableOpacity onPress={() => navigateTo('GrupoReg')} style={styles.option} activeOpacity={0.7}>            
-            <Image source={require('../../assets/icons/grupo.png')} style={{...styles.image, height: 39, }}/>                
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity onPress={() => navigateTo('GrupoReg')} style={styles.option} activeOpacity={0.7}>
+          <Users size={28} fill='#fff' color="#fff" />
+        </TouchableOpacity>
 
-        <View>
-          <TouchableOpacity onPress={() => navigateTo('MaisReg')} style={styles.option} activeOpacity={0.7}>            
-              <Image source={require('../../assets/icons/mais.png')} style={styles.image}/>                
-          </TouchableOpacity>        
-        </View>
+        <TouchableOpacity onPress={() => navigateTo('MaisReg')} style={styles.option} activeOpacity={0.7}>
+          <MoreHorizontal size={28} color="#fff" />
+        </TouchableOpacity>
       </View>
     </View>
   )
@@ -46,22 +37,20 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     position: 'absolute',
     bottom: 0,
-    left:0,
+    left: 0,
     right: 0,
+    paddingBottom: 20, // Espaço para safe area em dispositivos com notch
   },
   main: {
-    display: 'flex',
-    flexDirection: 'row',        
+    flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    paddingVertical: 10,    
-  },
-  image: {
-    width: 40,
-    height: 35,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
   },
   option: {
     flex: 1,
     alignItems: 'center',
+    paddingVertical: 8,
   },
 });

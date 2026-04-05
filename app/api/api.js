@@ -1,12 +1,12 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://adoracao-api-production.up.railway.app',
+  baseURL: 'https://api.adoracaoapp.com.br',
   timeout: 10000
 });
 
 /* =========================
-   AUTH
+  AUTH
 ========================= */
 
 export const registerUser = async (userData) => {
@@ -15,14 +15,26 @@ export const registerUser = async (userData) => {
 };
 
 export const userLogin = async (loginUser) => {
-  const response = await api.post('/login', loginUser, {
-    headers: { 'Content-Type': 'application/json' }
-  });
-  return response.data;
+
+  try {
+    const response = await axios.post(
+      'https://api.adoracaoapp.com.br/login', 
+      loginUser,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );    
+    return response.data; 
+  } catch (error) {
+    throw error;
+  }
+
 };
 
 /* =========================
-   HINÁRIOS (HARPA / CCB)
+  HINÁRIOS (HARPA / CCB)
 ========================= */
 
 /**
@@ -66,7 +78,7 @@ export const fetchHinoById = async (hinario, id) => {
 };
 
 /* =========================
-   HINÁRIO GERAL (LEGADO)
+  HINÁRIO GERAL (LEGADO)
 ========================= */
 
 export const fetchHinosGeral = async () => {
@@ -90,7 +102,7 @@ export const fetchHinoGeralById = async (id) => {
 };
 
 /* =========================
-   GRUPOS / HINOS
+  GRUPOS / HINOS
 ========================= */
 
 export const fetchHinarioGrupo = async (id_grupo) => {
@@ -104,7 +116,7 @@ export const removeHinoFromGrupo = async (id_grupo, id_hino) => {
 };
 
 /* =========================
-   USUÁRIOS / COMPONENTES
+  USUÁRIOS / COMPONENTES
 ========================= */
 
 export const fetchUsuariosParaComponentes = async () => {
@@ -123,7 +135,7 @@ export const removeComponentFromGrupo = async (idUser) => {
 };
 
 /* =========================
-   ENSAIOS
+  ENSAIOS
 ========================= */
 
 export const fetchEnsaiosDoGrupo = async (id_grupo) => {
@@ -147,7 +159,7 @@ export const removeEnsaio = async (id) => {
 };
 
 /* =========================
-   EVENTOS
+  EVENTOS
 ========================= */
 
 export const fetchEventosDoGrupo = async (id_grupo) => {
@@ -171,7 +183,7 @@ export const removeEvento = async (id) => {
 };
 
 /* =========================
-   FAVORITOS
+  FAVORITOS
 ========================= */
 
 export const addFavorito = async (id_user, hinoId, tipo_hino) => {

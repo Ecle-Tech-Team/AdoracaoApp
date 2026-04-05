@@ -25,7 +25,7 @@ export default function CriarGrupo({ navigateTo}) {
   
     const handleCreateGroup = async () => {
       try {
-        const response = await axios.post('https://adoracao-api-production.up.railway.app/grupo', {
+        const response = await axios.post('https://api.adoracaoapp.com.br/grupo', {
           name: groupName,
           local: groupLocal,
           typeGroup: 'Louvor',
