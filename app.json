@@ -1,6 +1,6 @@
 {
   "expo": {
-    
+
     "scheme": "acme",
     "web": {
       "bundler": "metro"
@@ -10,10 +10,25 @@
       "image": "./assets/images/splash.png",
       "backgroundColor": "#FFFFFF"
     },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#FFCB69",
+          "sounds": ["./assets/sounds/notification.wav"]
+        }
+      ]
+    ],
     "android": {
       "adaptativeIcon": "./assets/images/adaptative-icon.png",
       "backgroundColor": "#FFFFFF",
-      "package": "com.devlucasdeangelo.adoracaoapp"
+      "package": "com.devlucasdeangelo.adoracaoapp",
+      "permissions": [
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ],
+      "useNextNotificationsApi": true
     },
     "extra": {
       "eas": {
@@ -21,7 +36,12 @@
       }
     },
     "ios": {
-      "bundleIdentifier": "com.devlucasdeangelo.adoracaoapp"
+      "bundleIdentifier": "com.devlucasdeangelo.adoracaoapp",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      }
     }
   }
 }

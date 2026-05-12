@@ -1,9 +1,11 @@
 import { View, StyleSheet } from 'react-native';
 import React, { useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Notifications from 'expo-notifications';
 import { AuthProvider, AuthContext } from './contexts/AuthContext';
 import { HinarioProvider } from "./contexts/HinarioContext";
 import { SectionProvider } from "./contexts/SectionContext";
+import { registerForPushNotifications, setupNotificationListener } from './services/notificationService';
 import Login from './screens/login';
 import Cadastro from './screens/cadastro';
 import Dashboard from './screens/dashboard';
@@ -36,11 +38,11 @@ import hinarioGrupo from './screens/hinoComp';
 import Componentes from './screens/componentes';
 import AdicionarComp from './screens/adicionarComp';
 import Notificacoes from './screens/notificacoes';
-import MenuInferiorAdorador from './components/menuInferior';
-import MenuInferiorReg from './components/menuInferiorReg';
-import MenuInferiorComp from './components/menuInferiorComp';
-import MenuSuperiorAdorador from './components/menuSuperior';
-import MenuSuperiorGrupo from './components/menuSuperiorGrupo';
+import MenuInferiorAdorador from './components/MenuInferior';
+import MenuInferiorReg from './components/MenuInferiorReg';
+import MenuInferiorComp from './components/MenuInferiorComp';
+import MenuSuperiorAdorador from './components/MenuSuperior';
+import MenuSuperiorGrupo from './components/MenuSuperiorGrupo';
 import AdicionarEnsaio from './screens/adicionarEnsaio';
 import AdicionarEvento from './screens/adicionarEvento';
 
@@ -140,12 +142,41 @@ function Page() {
   );
 }
 
+function AppWrapper() {
+  const { user } = useContext(AuthContext);
+
+  useEffect(() => {
+    // Configurar handler de notificações
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+
+    // Configurar listener para notificações recebidas
+    const removeListener = setupNotificationListener();
+
+    // Configurar notificações quando o app inicia e o usuário está disponível
+    if (user?.id_user) {
+      registerForPushNotifications(user.id_user);
+    }
+
+    return () => {
+      removeListener();
+    };
+  }, [user]);
+
+  return <Page />;
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <HinarioProvider>
         <SectionProvider>
-          <Page />
+          <AppWrapper />
         </SectionProvider>
       </HinarioProvider>
     </AuthProvider>

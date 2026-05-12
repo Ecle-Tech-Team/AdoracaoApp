@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -l \"lucide-react\" app/**/*.js)",
+      "Bash(findstr /i \"registerforpush\")",
+      "Bash(findstr:*)",
+      "Bash(find C:/AdoracaoApp/app -type f \\\\\\(-name *.js -o -name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(find C:/AdoracaoApp/app -name *.js -type f)"
+    ]
+  }
+}

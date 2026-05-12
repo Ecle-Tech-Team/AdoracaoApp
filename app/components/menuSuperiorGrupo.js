@@ -1,37 +1,78 @@
-import { StyleSheet, View, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { StyleSheet, View, TouchableOpacity, Text } from 'react-native'
+import React, { useState, useEffect, useContext } from 'react'
 import { useFonts, Nunito_600SemiBold } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold } from '@expo-google-fonts/poppins';
-import { UserCircle, Heart, Bell } from 'lucide-react';
+import { FontAwesome, MaterialIcons, AntDesign } from '@expo/vector-icons';
+import { AuthContext } from '../contexts/AuthContext';
+import { fetchNotificacoes } from '../api/api';
+import { subscribeToNotifications } from '../services/notificationEvents';
 
 export default function MenuSuperiorGrupo({ navigateTo }) {
     const [fontLoaded] = useFonts({
         Nunito_600SemiBold,
         Poppins_700Bold
-      })
-    
-      if (!fontLoaded) {
+      });
+
+    const { user } = useContext(AuthContext);
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    useEffect(() => {
+        if (user?.id_user) {
+            loadUnreadCount();
+
+            // Se inscrever para atualizações de notificações
+            const unsubscribe = subscribeToNotifications(loadUnreadCount);
+
+            return () => {
+                unsubscribe();
+            };
+        }
+    }, [user]);
+
+    const loadUnreadCount = async () => {
+        try {
+            const notificacoes = await fetchNotificacoes(user.id_user);
+            const unread = notificacoes.filter(n => !n.lida).length;
+            setUnreadCount(unread);
+        } catch (error) {
+            console.error('Erro ao carregar contagem de notificações não lidas:', error);
+        }
+    };
+
+    const handleNotificationPress = () => {
+        navigateTo('Notificacoes');
+    };
+
+    if (!fontLoaded) {
         return null;
-      }
-  return (
-    <View style={styles.container}>
-        <View style={styles.main}>
-            <TouchableOpacity onPress={() => navigateTo('Perfil')} style={styles.profile}>
-                <UserCircle size={40} color="#FFCB69" />
-            </TouchableOpacity>
+    }
 
-            <View style={styles.actions}>
-                <TouchableOpacity onPress={() => navigateTo('Favoritos')} style={styles.actionButton}>
-                    <Heart size={28} color="#FFCB69" fill="#FFCB69" />
+    return (
+        <View style={styles.container}>
+            <View style={styles.main}>
+                <TouchableOpacity onPress={() => navigateTo('Perfil')} style={styles.profile}>
+                    <FontAwesome name="user-circle" size={40} color="#FFCB69" />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => navigateTo('Notificacao')} style={styles.actionButton}>
-                    <Bell size={28} fill='#FFCB69' color="#FFCB69" />
-                </TouchableOpacity>
+                <View style={styles.actions}>
+                    <TouchableOpacity onPress={() => navigateTo('Favoritos')} style={styles.actionButton}>
+                        <AntDesign name="heart" size={28} color="#FFCB69" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={handleNotificationPress} style={styles.actionButton}>
+                        <MaterialIcons name="notifications" size={28} color="#FFCB69" />
+                        {unreadCount > 0 && (
+                            <View style={styles.badge}>
+                                <Text style={styles.badgeText}>
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                </View>
             </View>
         </View>
-    </View>
-  )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -56,5 +97,23 @@ const styles = StyleSheet.create({
     actionButton: {
         padding: 8,
         marginLeft: 12,
+        position: 'relative',
+    },
+    badge: {
+        position: 'absolute',
+        top: 2,
+        right: 2,
+        backgroundColor: '#FF3B30',
+        borderRadius: 10,
+        minWidth: 20,
+        height: 20,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 4,
+    },
+    badgeText: {
+        color: '#FFF',
+        fontSize: 10,
+        fontWeight: 'bold',
     },
 })

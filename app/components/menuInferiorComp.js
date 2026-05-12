@@ -1,29 +1,29 @@
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { Home, BookOpenText, Search, Users, MoreHorizontal } from 'lucide-react';
+import { FontAwesome, MaterialIcons, Feather } from '@expo/vector-icons';
 
 export default function MenuInferiorComp({ navigateTo }) {
   return (
     <View style={styles.container}>
       <View style={styles.main}>
         <TouchableOpacity onPress={() => navigateTo('DashboardGrupo')} style={styles.option} activeOpacity={0.7}>
-          <Home size={28} fill='#fff' color="#fff" />
+          <FontAwesome name="home" size={28} color="#fff" />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigateTo('Adoracao')} style={styles.option} activeOpacity={0.7}>
-          <BookOpenText size={32} color="#fff" />
+          <MaterialIcons name="menu-book" size={32} color="#fff" />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigateTo('Pesquisa')} style={styles.option} activeOpacity={0.7}>
-          <Search size={28} color="#fff" />
+          <Feather name="search" size={28} color="#fff" />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigateTo('GrupoComp')} style={styles.option} activeOpacity={0.7}>
-          <Users size={28} fill='#fff' color="#fff" />
+          <FontAwesome name="users" size={28} color="#fff" />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => navigateTo('MaisComp')} style={styles.option} activeOpacity={0.7}>
-          <MoreHorizontal size={28} color="#fff" />
+          <Feather name="more-horizontal" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>

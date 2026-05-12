@@ -203,3 +203,88 @@ export const removeFavorito = async (id_user, hinoId) => {
   const response = await api.delete(`/favoritos/${id_user}/${hinoId}`);
   return response.data;
 };
+
+/* =========================
+   NOTIFICAÇÕES
+========================= */
+
+/**
+ * Busca notificações do usuário logado
+ */
+export const fetchNotificacoes = async (id_user) => {
+  try {
+    const response = await api.get(`/notificacoes/${id_user}`);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao buscar notificações:', error);
+    throw error;
+  }
+};
+
+/**
+ * Marca uma notificação como lida
+ */
+export const marcarComoLida = async (id_notificacao, id_user) => {
+  try {
+    const response = await api.put(
+      `/notificacoes/${id_notificacao}/lida`,
+      { id_user }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao marcar notificação como lida:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+/**
+ * Marca todas as notificações como lidas
+ */
+export const marcarTodasComoLidas = async () => {
+  try {
+    const response = await api.put('/notificacoes/lidas');
+    return response.data;
+  } catch (error) {
+    console.error(
+      'Erro ao marcar todas as notificações como lidas:',
+      error
+    );
+    throw error;
+  }
+};
+
+/**
+ * Remove uma notificação
+ */
+export const removerNotificacao = async (id_notificacao) => {
+  try {
+    const response = await api.delete(
+      `/notificacoes/${id_notificacao}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao remover notificação:', error);
+    throw error;
+  }
+};
+
+/* =========================
+   PUSH NOTIFICATIONS
+========================= */
+
+/**
+ * Registra o token do Expo Push no backend
+ */
+export const registerPushToken = async (token, id_user = null) => {
+  try {
+    const data = { token };
+    // Sempre enviar id_user, mesmo se for null
+    data.id_user = id_user;  
+
+    const response = await api.post('/push-token', data);
+    return response.data;
+  } catch (error) {
+    console.error('Erro ao registrar token push:', error.response?.data || error.message);
+    throw error;
+  }
+};
