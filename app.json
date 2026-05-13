@@ -1,7 +1,8 @@
 {
   "expo": {
-
-    "scheme": "acme",
+    "name": "AdoraçãoApp",
+    "slug": "adoracao-app",
+    "scheme": "adoracaoapp",
     "web": {
       "bundler": "metro"
     },
@@ -16,9 +17,13 @@
         {
           "icon": "./assets/images/notification-icon.png",
           "color": "#FFCB69",
-          "sounds": ["./assets/sounds/notification.wav"]
+          "sounds": [
+            "./assets/sounds/notification.wav"
+          ]
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker",
+      "expo-router"
     ],
     "android": {
       "adaptativeIcon": "./assets/images/adaptative-icon.png",

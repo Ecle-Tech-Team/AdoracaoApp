@@ -2,8 +2,8 @@ import { StyleSheet, Text, View, TextInput, Image, TouchableOpacity, Alert } fro
 import React, { useState, useEffect, useContext } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchHinarioGrupo, removeHinoFromGrupo } from '../api/api';
-import { AuthContext } from '../contexts/AuthContext';
+import { fetchHinarioGrupo, removeHinoFromGrupo } from '../../src/api/api';
+import { AuthContext } from '../../src/contexts/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function HinarioReg({ navigateTo }) {

@@ -5,7 +5,11 @@
       "Bash(findstr /i \"registerforpush\")",
       "Bash(findstr:*)",
       "Bash(find C:/AdoracaoApp/app -type f \\\\\\(-name *.js -o -name *.ts -o -name *.tsx \\\\\\))",
-      "Bash(find C:/AdoracaoApp/app -name *.js -type f)"
+      "Bash(find C:/AdoracaoApp/app -name *.js -type f)",
+      "Bash(npx expo:*)",
+      "Bash(npx expo-cli:*)",
+      "WebSearch",
+      "Bash(npm view:*)"
     ]
   }
 }

@@ -2,9 +2,9 @@ import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, TextInput, A
 import React, { useEffect, useState, useContext } from "react";
 import { useFonts, Nunito_500Medium } from "@expo-google-fonts/nunito";
 import { Poppins_700Bold, Poppins_600SemiBold } from "@expo-google-fonts/poppins";
-import { fetchFavoritos, removeFavorito } from "../api/api";
-import { AuthContext } from "../contexts/AuthContext";
-import { HinarioContext } from "../contexts/HinarioContext";
+import { fetchFavoritos, removeFavorito } from "../../src/api/api";
+import { AuthContext } from "../../src/contexts/AuthContext";
+import { HinarioContext } from "../../src/contexts/HinarioContext";
 
 export default function MudarHinario({ navigateTo }) {
   const { hinario, trocarHinario } = useContext(HinarioContext);

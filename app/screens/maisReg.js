@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
 import React, { useContext } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { AuthContext } from '../contexts/AuthContext';
+import { AuthContext } from '../../src/contexts/AuthContext';
 
 export default function MaisReg({ navigateTo }) {
   const { logout } = useContext(AuthContext);

@@ -4,7 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold } from '@expo-google-fonts/poppins';
-import { registerUser } from '../api/api';
+import { registerUser } from '../../src/api/api';
 
 export default function Cadastro({ navigateTo }) {
   const [name, setName] = useState('');

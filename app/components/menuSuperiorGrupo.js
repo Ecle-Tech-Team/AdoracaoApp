@@ -3,9 +3,9 @@ import React, { useState, useEffect, useContext } from 'react'
 import { useFonts, Nunito_600SemiBold } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { FontAwesome, MaterialIcons, AntDesign } from '@expo/vector-icons';
-import { AuthContext } from '../contexts/AuthContext';
-import { fetchNotificacoes } from '../api/api';
-import { subscribeToNotifications } from '../services/notificationEvents';
+import { AuthContext } from '../../src/contexts/AuthContext';
+import { fetchNotificacoes } from '../../src/api/api';
+import { subscribeToNotifications } from '../../src/services/notificationEvents';
 
 export default function MenuSuperiorGrupo({ navigateTo }) {
     const [fontLoaded] = useFonts({

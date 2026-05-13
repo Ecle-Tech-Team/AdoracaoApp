@@ -2,9 +2,9 @@ import { StyleSheet, Text, View, FlatList, TouchableOpacity, TextInput, Image, A
 import React, { useEffect, useState, useContext } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold , Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchHinosByHinario, addFavorito, removeFavorito, fetchFavoritos } from '../api/api';
-import { AuthContext } from '../contexts/AuthContext';
-import { HinarioContext } from '../contexts/HinarioContext';
+import { fetchHinosByHinario, addFavorito, removeFavorito, fetchFavoritos } from '../../src/api/api';
+import { AuthContext } from '../../src/contexts/AuthContext';
+import { HinarioContext } from '../../src/contexts/HinarioContext';
 
 export default function Harpa({ navigateTo }) {
   const { user } = useContext(AuthContext);

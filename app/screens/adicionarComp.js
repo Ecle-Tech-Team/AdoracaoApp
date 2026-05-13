@@ -2,8 +2,8 @@ import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Alert } 
 import React, { useState, useEffect, useContext } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchUsuariosParaComponentes } from '../api/api';
-import { AuthContext } from '../contexts/AuthContext';
+import { fetchUsuariosParaComponentes } from '../../src/api/api';
+import { AuthContext } from '../../src/contexts/AuthContext';
 import axios from 'axios';
 
 export default function AdicionarComp({ navigateTo }) {

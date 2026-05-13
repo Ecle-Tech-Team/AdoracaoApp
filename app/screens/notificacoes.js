@@ -13,10 +13,10 @@ import {
 } from "@expo-google-fonts/poppins";
 
 import * as Notifications from "expo-notifications";
-import { fetchNotificacoes, marcarComoLida } from "../api/api";
-import { AuthContext } from "../contexts/AuthContext";
-import { registerForPushNotifications } from "../services/notificationService";
-import { notifyNotificationsUpdated, subscribeToNotifications } from "../services/notificationEvents";
+import { fetchNotificacoes, marcarComoLida } from "../../src/api/api";
+import { AuthContext } from "../../src/contexts/AuthContext";
+import { registerForPushNotifications } from "../../src/services/notificationService";
+import { notifyNotificationsUpdated, subscribeToNotifications } from "../../src/services/notificationEvents";
 
 export default function Notificacoes() {
   const [notificacoes, setNotificacoes] = useState([]);

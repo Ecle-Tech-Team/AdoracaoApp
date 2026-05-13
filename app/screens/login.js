@@ -11,11 +11,11 @@ import React, { useState } from "react";
 import { useContext } from "react";
 import { useFonts, Nunito_500Medium } from "@expo-google-fonts/nunito";
 import { Poppins_700Bold } from "@expo-google-fonts/poppins";
-import { AuthContext } from "../contexts/AuthContext";
-import { userLogin } from "../api/api";
+import { AuthContext } from "../../src/contexts/AuthContext";
+import { userLogin } from "../../src/api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { registerForPushNotifications } from "../services/notificationService";
-import { registerPushToken } from "../api/api";
+import { registerForPushNotifications } from "../../src/services/notificationService";
+import { registerPushToken } from "../../src/api/api";
 
 export default function Login({ navigateTo }) {
   const { login } = useContext(AuthContext);

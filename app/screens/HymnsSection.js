@@ -1,8 +1,8 @@
 import { StyleSheet, Text, View, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import HymnCard from '../components/HymnCard';
-import { useHymns } from '../hooks/useHymns';
-import { useSection } from '../contexts/SectionContext';
+import { useHymns } from '../../src/hooks/useHymns';
+import { useSection } from '../../src/contexts/SectionContext';
 
 export default function HymnsSection({ navigateTo, selectedHino, previousScreen }) {
   const { sectionData } = useSection();

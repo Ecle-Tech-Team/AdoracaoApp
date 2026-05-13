@@ -2,8 +2,8 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, FlatList } 
 import React, { useState, useEffect, useContext } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchHinosGeral, fetchHinarioGrupo } from '../api/api'; 
-import { AuthContext } from '../contexts/AuthContext';
+import { fetchHinosGeral, fetchHinarioGrupo } from '../../src/api/api'; 
+import { AuthContext } from '../../src/contexts/AuthContext';
 import axios from 'axios';
 
 export default function AdicionarHino({ navigateTo }) {

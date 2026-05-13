@@ -13,8 +13,8 @@ import {
   Poppins_700Bold,
   Poppins_600SemiBold,
 } from "@expo-google-fonts/poppins";
-import { createEvento, fetchHinarioGrupo } from "../api/api";
-import { AuthContext } from "../contexts/AuthContext";
+import { createEvento, fetchHinarioGrupo } from "../../src/api/api";
+import { AuthContext } from "../../src/contexts/AuthContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 export default function AdicionarEvento({ navigateTo }) {

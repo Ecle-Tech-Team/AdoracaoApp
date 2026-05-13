@@ -2,8 +2,8 @@ import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native'
 import React, { useState, useEffect, useContext } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchComponentes, removeComponentFromGrupo } from '../api/api';
-import { AuthContext } from '../contexts/AuthContext';
+import { fetchComponentes, removeComponentFromGrupo } from '../../src/api/api';
+import { AuthContext } from '../../src/contexts/AuthContext';
 
 export default function MaisComp({ navigateTo }) {  
   const [componentes, setComponentes] = useState([]);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import HymnCard from '../components/HymnCard';
-import { useHymns } from '../hooks/useHymns';
+import { useHymns } from '../../src/hooks/useHymns';
 
 // Exemplo de uso do HymnCard com diferentes filtros
 const HymnCardUsage = () => {

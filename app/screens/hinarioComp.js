@@ -2,8 +2,8 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-nativ
 import React, { useState, useEffect, useContext } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchHinarioGrupo } from '../api/api';
-import { AuthContext } from '../contexts/AuthContext';
+import { fetchHinarioGrupo } from '../../src/api/api';
+import { AuthContext } from '../../src/contexts/AuthContext';
 
 export default function HinarioComp({ navigateTo }) {
   const { id_grupo } = useContext(AuthContext); 

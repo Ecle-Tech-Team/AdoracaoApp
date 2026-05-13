@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity } from 'r
 import React, { useState, useEffect } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchHinosByHinario, fetchHinosGeral } from '../api/api';
+import { fetchHinosByHinario, fetchHinosGeral } from '../../src/api/api';
 
 const removeAccents = (str) =>
   str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : '';

@@ -2,8 +2,8 @@ import { StyleSheet, Text, Image, View, TextInput, FlatList, TouchableOpacity, A
 import React, { useState, useEffect, useContext } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchComponentes } from '../api/api';
-import { AuthContext } from '../contexts/AuthContext';
+import { fetchComponentes } from '../../src/api/api';
+import { AuthContext } from '../../src/contexts/AuthContext';
 
 export default function Componentes({ navigateTo }) {
   const { id_grupo } = useContext(AuthContext); 

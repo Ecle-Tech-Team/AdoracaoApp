@@ -2,8 +2,8 @@ import { StyleSheet, Text, View, TouchableOpacity, TextInput, FlatList, Image, A
 import React, { useEffect, useState, useContext } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchHinosGeral, fetchFavoritos, addFavorito, removeFavorito } from '../api/api';
-import { AuthContext } from '../contexts/AuthContext';
+import { fetchHinosGeral, fetchFavoritos, addFavorito, removeFavorito } from '../../src/api/api';
+import { AuthContext } from '../../src/contexts/AuthContext';
 
 export default function Hinario({ navigateTo }) {
   const { user } = useContext(AuthContext);

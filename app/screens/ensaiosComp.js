@@ -2,8 +2,8 @@ import { StyleSheet, Text, View, TouchableOpacity, FlatList, Alert } from 'react
 import React, { useState, useEffect, useContext } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchEnsaiosDoGrupo } from '../api/api';
-import { AuthContext } from '../contexts/AuthContext';
+import { fetchEnsaiosDoGrupo } from '../../src/api/api';
+import { AuthContext } from '../../src/contexts/AuthContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

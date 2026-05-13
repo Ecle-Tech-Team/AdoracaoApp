@@ -1,9 +1,9 @@
 import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, FlatList, Dimensions, ActivityIndicator } from 'react-native';
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import HymnCard from '../components/HymnCard';
-import { useHymns } from '../hooks/useHymns';
-import { AuthContext } from '../contexts/AuthContext';
-import { useSection } from '../contexts/SectionContext';
+import { useHymns } from '../../src/hooks/useHymns';
+import { AuthContext } from '../../src/contexts/AuthContext';
+import { useSection } from '../../src/contexts/SectionContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 
