@@ -99,13 +99,7 @@ export default function HymnsSection({ navigateTo, selectedHino, previousScreen 
         onPress={() => handleHymnPress(item)}
         size="medium"
       />
-      <View style={styles.hymnInfo}>
-        <Text style={styles.hymnTitle} numberOfLines={2}>
-          {item.titulo || item.title}
-        </Text>
-        <Text style={styles.hymnAuthor} numberOfLines={1}>
-          {item.autor || item.author}
-        </Text>
+      <View style={styles.hymnInfo}>        
         {item.numero && (
           <Text style={styles.hymnNumber}>#{item.numero}</Text>
         )}

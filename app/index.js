@@ -129,14 +129,16 @@ function Page() {
   return (
     <View style={styles.container}>
       {user && MenuSuperiorComponent && <MenuSuperiorComponent navigateTo={navigateTo} />}
-      <ScreenComponent
-        navigateTo={navigateTo}
-        selectedHino={selectedHino}
-        previousScreen={previousScreen} 
-        selectedHinoGeral={selectedHinoGeral}
-        onLogin={handleLogin}
-        onLogout={handleLogout}
-      />
+      <View style={styles.content}>
+        <ScreenComponent
+          navigateTo={navigateTo}
+          selectedHino={selectedHino}
+          previousScreen={previousScreen}
+          selectedHinoGeral={selectedHinoGeral}
+          onLogin={handleLogin}
+          onLogout={handleLogout}
+        />
+      </View>
       {user && MenuInferiorComponent && <MenuInferiorComponent navigateTo={navigateTo} />}
     </View>
   );
@@ -185,6 +187,9 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  content: {
     flex: 1,
   },
 });

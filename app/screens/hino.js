@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native'
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFonts, Nunito_700Bold, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
+import { saveRecentlyViewed } from '../../src/services/recentlyViewed';
 
 const formatText = (text, style = styles.textLine) => {
   if (!text) return null;
@@ -25,6 +26,12 @@ export default function Hino({ selectedHino, navigateTo, previousScreen }) {
     Poppins_700Bold,
     Poppins_600SemiBold
   });
+
+  useEffect(() => {
+    if (selectedHino) {
+      saveRecentlyViewed(selectedHino);
+    }
+  }, [selectedHino]);
 
   if (!fontLoaded) return null;
 
@@ -85,7 +92,6 @@ export default function Hino({ selectedHino, navigateTo, previousScreen }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: 60
   },
   h2: {
     fontSize: 24,

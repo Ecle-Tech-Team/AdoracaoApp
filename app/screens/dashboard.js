@@ -3,11 +3,26 @@ import React, { useState, useRef, useEffect, useContext } from 'react';
 import HymnCard from '../components/HymnCard';
 import { useHymns } from '../../src/hooks/useHymns';
 import { AuthContext } from '../../src/contexts/AuthContext';
+import { HinarioContext } from '../../src/contexts/HinarioContext';
 import { useSection } from '../../src/contexts/SectionContext';
+import { fetchHinosByHinario } from '../../src/api/api';
+import { getRecentlyViewed as loadRecentlyViewed, saveRecentlyViewed } from '../../src/services/recentlyViewed';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-// Dados de exemplo para banners do carrossel
+// Imagens padrão para cada hinário
+const HINARIO_IMAGES = {
+  HARPA: 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=400&h=300&fit=crop',
+  CCB: 'https://images.unsplash.com/photo-1461784121038-f088ca1e7714?w=400&h=300&fit=crop',
+  GERAL: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop',
+};
+
+const HINARIO_INFO = {
+  HARPA: { label: 'Harpa Cristã', image: HINARIO_IMAGES.HARPA, cor: '#8B4513' },
+  CCB: { label: 'CCB', image: HINARIO_IMAGES.CCB, cor: '#2E5090' },
+  GERAL: { label: 'Hinos Gerais', image: HINARIO_IMAGES.GERAL, cor: '#6B8E23' },
+};
+
 const bannerData = [
   { id: '1', title: 'Novo Hinário', description: 'Lançamento especial', image: 'https://picsum.photos/400/200?random=1' },
   { id: '2', title: 'Hinos em Destaque', description: 'Os mais ouvidos esta semana', image: 'https://picsum.photos/400/200?random=2' },
@@ -15,7 +30,6 @@ const bannerData = [
   { id: '4', title: 'Clássicos Renovados', description: 'Novos arranjos', image: 'https://picsum.photos/400/200?random=4' },
 ];
 
-// Componente do banner do carrossel
 const BannerItem = ({ item }) => (
   <View style={styles.bannerContainer}>
     <Image source={{ uri: item.image }} style={styles.bannerImage} />
@@ -26,9 +40,7 @@ const BannerItem = ({ item }) => (
   </View>
 );
 
-
-// Componente da seção
-const Section = ({ title, data, onItemPress, onSeeAllPress, loading }) => {
+const Section = ({ title, data, onItemPress, onSeeAllPress, loading, hinarioType }) => {
   if (loading) {
     return (
       <View style={styles.section}>
@@ -59,6 +71,7 @@ const Section = ({ title, data, onItemPress, onSeeAllPress, loading }) => {
             hymn={item}
             onPress={() => onItemPress(item)}
             size="medium"
+            hinarioType={hinarioType}
           />
         )}
         keyExtractor={item => item.id || item._id || Math.random().toString()}
@@ -70,29 +83,46 @@ const Section = ({ title, data, onItemPress, onSeeAllPress, loading }) => {
   );
 };
 
+// Card de hinário com imagem padrão
+const HinarioCard = ({ hinarioKey, info, onPress }) => (
+  <TouchableOpacity
+    style={styles.hinarioCard}
+    onPress={onPress}
+    activeOpacity={0.8}
+  >
+    <Image source={{ uri: info.image }} style={styles.hinarioCardImage} />
+    <View style={[styles.hinarioCardOverlay, { backgroundColor: info.cor + 'CC' }]}>
+      <Text style={styles.hinarioCardLabel}>{info.label}</Text>
+    </View>
+  </TouchableOpacity>
+);
+
 export default function Dashboard({ navigateTo }) {
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [newReleases, setNewReleases] = useState([]);
   const [popularHymns, setPopularHymns] = useState([]);
+  const [classicHymns, setClassicHymns] = useState([]);
   const [loadingSections, setLoadingSections] = useState({
     recentlyViewed: true,
     newReleases: true,
     popular: true,
+    classics: true,
   });
   const { user } = useContext(AuthContext);
+  const { hinario } = useContext(HinarioContext);
   const { updateSectionData } = useSection();
 
   const flatListRef = useRef(null);
 
-  // Usar o hook de hinos (substitua 'userId' pelo ID real do usuário logado)
-  const userId = user.id_user; 
+  const userId = user.id_user;
   const {
     hymns,
     loading: hymnsLoading,
     getRecentlyViewed,
     getNewReleases,
-    getPopularHymns
+    getPopularHymns,
+    fetchHymnsByHinario: fetchHymnsByHinarioHook,
   } = useHymns(userId);
 
   const handleBannerScroll = (event) => {
@@ -102,7 +132,7 @@ export default function Dashboard({ navigateTo }) {
   };
 
   const handleHymnPress = (hymn) => {
-    // Determinar qual tela de hino usar baseado no tipo
+    saveRecentlyViewed(hymn);
     if (hymn.tipo_hino === 'GERAL') {
       navigateTo('HinoGeral', hymn, null, 'Dashboard');
     } else {
@@ -111,33 +141,59 @@ export default function Dashboard({ navigateTo }) {
   };
 
   const handleSeeAllPress = (sectionTitle, hymns) => {
-    // Salvar os dados da seção no contexto
     const filterType = sectionTitle.toLowerCase().replace(/\s+/g, '_');
     updateSectionData(sectionTitle, hymns, filterType);
-
-    // Navegar para a tela HymnsSection
     navigateTo('HymnsSection', null, null, 'Dashboard');
   };
 
-  // Carregar dados para as seções
+  // Navegar para tela do hinário específico
+  const handleHinarioPress = (tipo) => {
+    if (tipo === 'GERAL') {
+      navigateTo('HinoGeral', null, null, 'Dashboard');
+    } else {
+      navigateTo('Harpa', { tipo_hino: tipo }, null, 'Dashboard');
+    }
+  };
+
+  // Carregar recentemente vistos (não depende dos hinos da API)
   useEffect(() => {
+    let cancelled = false;
+
+    const loadRecent = async () => {
+      try {
+        const recent = await loadRecentlyViewed(6);
+        if (cancelled) return;
+        setRecentlyViewed(recent);
+        setLoadingSections(prev => ({ ...prev, recentlyViewed: false }));
+      } catch (error) {
+        console.error('Erro ao carregar recentemente vistos:', error);
+        setLoadingSections(prev => ({ ...prev, recentlyViewed: false }));
+      }
+    };
+
+    loadRecent();
+    return () => { cancelled = true; };
+  }, []);
+
+  // Carregar novas seções (depende dos hinos carregados)
+  useEffect(() => {
+    let cancelled = false;
+
     const loadSectionData = async () => {
       if (!hymnsLoading && hymns.length > 0) {
         try {
-          // Carregar hinos recentemente vistos
-          const recent = await getRecentlyViewed(6);
-          setRecentlyViewed(recent);
-          setLoadingSections(prev => ({ ...prev, recentlyViewed: false }));
-
-          // Carregar novos lançamentos
-          const newReleasesData = await getNewReleases(6);
+          const [newReleasesData, popular] = await Promise.all([
+            getNewReleases(6),
+            getPopularHymns(6),
+          ]);
+          if (cancelled) return;
           setNewReleases(newReleasesData);
-          setLoadingSections(prev => ({ ...prev, newReleases: false }));
-
-          // Carregar hinos populares
-          const popular = await getPopularHymns(6);
           setPopularHymns(popular);
-          setLoadingSections(prev => ({ ...prev, popular: false }));
+          setLoadingSections(prev => ({
+            ...prev,
+            newReleases: false,
+            popular: false,
+          }));
         } catch (error) {
           console.error('Erro ao carregar dados das seções:', error);
         }
@@ -145,9 +201,43 @@ export default function Dashboard({ navigateTo }) {
     };
 
     loadSectionData();
+    return () => { cancelled = true; };
   }, [hymns, hymnsLoading]);
 
-  // Mostrar loading geral enquanto carrega hinos
+  // Carregar clássicos baseado no hinário selecionado
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadClassics = async () => {
+      if (hymnsLoading) return;
+
+      try {
+        let classics = [];
+        if (hinario === 'HARPA') {
+          const data = await fetchHinosByHinario('harpa');
+          if (!cancelled) classics = (data || []).slice(0, 6);
+        } else if (hinario === 'CCB') {
+          const data = await fetchHinosByHinario('ccb');
+          if (!cancelled) classics = (data || []).slice(0, 6);
+        } else {
+          if (!cancelled) classics = hymns.filter(h => h.tipo_hino === 'GERAL' || !h.tipo_hino).slice(0, 6);
+        }
+        if (!cancelled) {
+          setClassicHymns(classics);
+          setLoadingSections(prev => ({ ...prev, classics: false }));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar clássicos:', error);
+        if (!cancelled) {
+          setLoadingSections(prev => ({ ...prev, classics: false }));
+        }
+      }
+    };
+
+    loadClassics();
+    return () => { cancelled = true; };
+  }, [hinario, hymns, hymnsLoading]);
+
   if (hymnsLoading) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
@@ -173,7 +263,6 @@ export default function Dashboard({ navigateTo }) {
           scrollEventThrottle={16}
         />
 
-        {/* Indicadores do carrossel */}
         <View style={styles.indicatorContainer}>
           {bannerData.map((_, index) => (
             <View
@@ -187,6 +276,13 @@ export default function Dashboard({ navigateTo }) {
         </View>
       </View>
 
+      {/* Cards de Hinários
+      <View style={styles.hinarioCardsRow}>
+        <HinarioCard hinarioKey="HARPA" info={HINARIO_INFO.HARPA} onPress={() => handleHinarioPress('HARPA')} />
+        <HinarioCard hinarioKey="CCB" info={HINARIO_INFO.CCB} onPress={() => handleHinarioPress('CCB')} />
+        <HinarioCard hinarioKey="GERAL" info={HINARIO_INFO.GERAL} onPress={() => handleHinarioPress('GERAL')} />
+      </View> */}
+
       {/* Seção de Hinos Recentemente Vistos */}
       <Section
         title="Recentemente Vistos"
@@ -194,6 +290,7 @@ export default function Dashboard({ navigateTo }) {
         onItemPress={handleHymnPress}
         onSeeAllPress={handleSeeAllPress}
         loading={loadingSections.recentlyViewed}
+        hinarioType="GERAL"
       />
 
       {/* Seção de Novos Lançamentos */}
@@ -203,6 +300,7 @@ export default function Dashboard({ navigateTo }) {
         onItemPress={handleHymnPress}
         onSeeAllPress={handleSeeAllPress}
         loading={loadingSections.newReleases}
+        hinarioType="GERAL"
       />
 
       {/* Seção de Hinos Populares */}
@@ -212,10 +310,20 @@ export default function Dashboard({ navigateTo }) {
         onItemPress={handleHymnPress}
         onSeeAllPress={handleSeeAllPress}
         loading={loadingSections.popular}
+        hinarioType="GERAL"
       />
 
-      {/* Espaço extra no final */}
-      <View style={styles.bottomSpacing} />
+      {/* Seção de Clássicos - baseada no hinário selecionado */}
+      <Section
+        title="Clássicos"
+        data={classicHymns}
+        onItemPress={handleHymnPress}
+        onSeeAllPress={handleSeeAllPress}
+        loading={loadingSections.classics}
+        hinarioType={hinario}
+      />
+
+      {/* Fim das seções */}
     </ScrollView>
   );
 }
@@ -274,6 +382,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFCB69',
     width: 12,
   },
+  // Cards de hinário
+  hinarioCardsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginBottom: 32,
+  },
+  hinarioCard: {
+    width: (screenWidth - 48) / 3,
+    height: 100,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  hinarioCardImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  hinarioCardOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    alignItems: 'center',
+  },
+  hinarioCardLabel: {
+    color: 'white',
+    fontSize: 11,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   section: {
     marginBottom: 32,
     paddingHorizontal: 16,
@@ -296,29 +437,6 @@ const styles = StyleSheet.create({
   },
   horizontalList: {
     paddingRight: 16,
-  },
-  hymnCard: {
-    width: 150,
-    marginRight: 16,
-  },
-  hymnImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  hymnTitle: {
-    color: 'black',
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 4,
-  },
-  hymnAuthor: {
-    color: '#B3B3B3',
-    fontSize: 12,
-  },
-  bottomSpacing: {
-    height: 40,
   },
   loadingContainer: {
     flex: 1,
