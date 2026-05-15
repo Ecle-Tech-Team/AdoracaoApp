@@ -122,6 +122,8 @@ function Page() {
     ScreenComponent = currentScreen === "Cadastro" ? Cadastro : Login;
   } else if (currentScreen === 'Dashboard') {
     ScreenComponent = DashboardComponent;
+  } else if (currentScreen === 'HinoGeral' || (currentScreen === 'Hino' && selectedHino?.tipo_hino === 'GERAL')) {
+    ScreenComponent = HinoGeral;
   } else {
     ScreenComponent = userScreens[userType]?.screens.find(screen => screen.name === currentScreen) || DashboardComponent;
   }

@@ -25,12 +25,12 @@ export default function Pesquisa({ navigateTo }) {
         // 🔹 Normaliza os dados
         const hinosHinarios = [...harpa, ...ccb].map(h => ({
           ...h,
-          tipo_hino: 'hinario'
+          tipo_hino: h.tipo_hino || 'HARPA'
         }));
 
         const hinosGerais = geral.map(h => ({
           ...h,
-          tipo_hino: 'geral'
+          tipo_hino: h.tipo_hino || 'GERAL'
         }));
 
         const all = [...hinosHinarios, ...hinosGerais];
@@ -51,7 +51,7 @@ export default function Pesquisa({ navigateTo }) {
       removeAccents(hino.titulo.toLowerCase()).includes(
         removeAccents(searchText.toLowerCase())
       ) ||
-      (hino.tipo_hino === 'hinario' &&
+      (hino.tipo_hino !== 'GERAL' &&
         hino.numero?.toString().includes(searchText))
     );
 
@@ -93,7 +93,7 @@ export default function Pesquisa({ navigateTo }) {
               onPress={() => handleSelectHino(item)}
             >
               <Text style={styles.hinoText}>
-                {item.tipo_hino === 'hinario'
+                {item.tipo_hino !== 'GERAL'
                   ? `${item.numero} - ${item.titulo}`
                   : `${item.titulo}${item.autor ? ` · ${item.autor}` : ''}`}
               </Text>

@@ -65,4 +65,5 @@ web-build/
 
 # Code
 .env
-/.claude
+/claude
+settings.local.json
