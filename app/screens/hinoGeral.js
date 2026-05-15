@@ -7,8 +7,12 @@ import {
   Dimensions,
   Modal,
   Pressable,
+  FlatList,
+  Alert,
+  ActivityIndicator,
+  TextInput,
 } from "react-native";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useContext } from "react";
 import {
   useFonts,
   Nunito_700Bold,
@@ -19,6 +23,12 @@ import {
   Poppins_600SemiBold,
 } from "@expo-google-fonts/poppins";
 import { saveRecentlyViewed } from "../../src/services/recentlyViewed";
+import { AuthContext } from "../../src/contexts/AuthContext";
+import {
+  getUserPlaylists,
+  addHinoToPlaylist,
+  createPlaylist,
+} from "../../src/api/api";
 
 const FONT_STEP = 2;
 const FONT_MIN = 12;
@@ -53,6 +63,12 @@ export default function HinoGeral({
 
   const [fontSize, setFontSize] = useState(getBaseFontSize());
   const [modalVisible, setModalVisible] = useState(false);
+  const [playlistModalVisible, setPlaylistModalVisible] = useState(false);
+  const [userPlaylists, setUserPlaylists] = useState([]);
+  const [loadingPlaylists, setLoadingPlaylists] = useState(false);
+  const [showCreateFromHino, setShowCreateFromHino] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState("");
+  const { user } = useContext(AuthContext);
 
   useEffect(() => {
     if (selectedHino) {
@@ -60,29 +76,39 @@ export default function HinoGeral({
     }
   }, [selectedHino]);
 
+  const { titulo, autor, verses } = selectedHino || {};
+  const isFromBiblioteca = previousScreen === 'MinhaBiblioteca';
+
   const dynamicStyles = useMemo(
-    () => ({
+    () => {
+      const c = isFromBiblioteca
+        ? { text: "#2E2E2E", title: "#101010", bg: "#EDEDED" }
+        : { text: "#5F8BA9", title: "#26516E", bg: "#F1FBFF" };
+      return {
       textLine: {
         fontSize: fontSize,
         marginBottom: 10,
         fontFamily: "Nunito_500Medium",
-        color: "#5F8BA9",
+        color: c.text,
         lineHeight: fontSize + 4,
       },
       title: {
         fontSize: fontSize + 2,
         fontFamily: "Poppins_700Bold",
-        color: "#26516E",
+        color: c.title,
         marginTop: 15,
       },
       autor: {
         fontSize: fontSize - 1,
         fontFamily: "Poppins_600SemiBold",
-        color: "#26516E",
+        color: c.title,
         marginBottom: 20,
       },
-    }),
-    [fontSize],
+      containerBg: c.bg,
+      menuDotsColor: c.title,
+      backBtnBg: c.title,
+    }},
+    [fontSize, isFromBiblioteca],
   );
 
   if (!fontLoaded) {
@@ -97,14 +123,69 @@ export default function HinoGeral({
     );
   }
 
-  const { titulo, autor, verses } = selectedHino;
-
   const aumentarFonte = () =>
     setFontSize((prev) => Math.min(prev + FONT_STEP, FONT_MAX));
   const diminuirFonte = () =>
     setFontSize((prev) => Math.max(prev - FONT_STEP, FONT_MIN));
 
-  const renderFontModal = () => (
+  // Playlist functions
+  const loadPlaylists = async () => {
+    if (!user?.id_user) return;
+    setLoadingPlaylists(true);
+    try {
+      const data = await getUserPlaylists(user.id_user);
+      setUserPlaylists(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar playlists:", error);
+    } finally {
+      setLoadingPlaylists(false);
+    }
+  };
+
+  const handleOpenPlaylistSelector = () => {
+    setModalVisible(false);
+    setPlaylistModalVisible(true);
+    loadPlaylists();
+  };
+
+  const handleAddToPlaylist = async (playlistId) => {
+    try {
+      await addHinoToPlaylist(
+        playlistId,
+        user.id_user,
+        selectedHino._id,
+        selectedHino.tipo_hino
+      );
+      Alert.alert("Adicionado", "Hino adicionado à playlist!");
+    } catch (error) {
+      const msg =
+        error?.response?.data?.message || error.message;
+      if (msg.includes("já está")) {
+        Alert.alert("Aviso", "Este hino já está nesta playlist.");
+      } else {
+        Alert.alert("Erro", "Não foi possível adicionar o hino.");
+      }
+    }
+  };
+
+  const handleCreateFromHino = async () => {
+    if (!newPlaylistName.trim()) return;
+    try {
+      await createPlaylist(user.id_user, newPlaylistName.trim());
+      setNewPlaylistName("");
+      setShowCreateFromHino(false);
+      loadPlaylists();
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possível criar a playlist.");
+    }
+  };
+
+  const renderFontModal = () => {
+    const c = isFromBiblioteca
+      ? { bg: "#EDEDED", text: "#2E2E2E", title: "#101010", btn: "#101010" }
+      : { bg: "#F1FBFF", text: "#5F8BA9", title: "#26516E", btn: "#26516E" };
+
+    return (
     <Modal
       transparent
       visible={modalVisible}
@@ -115,38 +196,129 @@ export default function HinoGeral({
         style={styles.modalOverlay}
         onPress={() => setModalVisible(false)}
       >
-        <Pressable style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Tamanho da Fonte</Text>
+        <Pressable style={[styles.modalContent, { backgroundColor: c.bg }]}>
+          <Text style={[styles.modalTitle, { color: c.title }]}>Opções</Text>
 
-          <View style={styles.modalControls}>
+          <TouchableOpacity
+            style={[styles.modalBtn, styles.modalOptionBtn, { backgroundColor: c.btn }]}
+            onPress={diminuirFonte}
+            disabled={fontSize <= FONT_MIN}
+          >
+            <Text style={styles.modalBtnText}>A- Diminuir fonte</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.modalBtn, styles.modalOptionBtn, { backgroundColor: c.btn }]}
+            onPress={aumentarFonte}
+            disabled={fontSize >= FONT_MAX}
+          >
+            <Text style={styles.modalBtnText}>A+ Aumentar fonte</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.modalBtn, styles.modalOptionBtn, { backgroundColor: c.title }]}
+            onPress={handleOpenPlaylistSelector}
+          >
+            <Text style={styles.modalBtnText}>Salvar na playlist</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.cancelOptionBtn}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={[styles.cancelOptionText, { color: c.text }]}>Fechar</Text>
+          </TouchableOpacity>
+        </Pressable>
+      </Pressable>
+    </Modal>
+    );
+  };
+
+  const renderPlaylistSelectorModal = () => (
+    <Modal
+      transparent
+      visible={playlistModalVisible}
+      animationType="fade"
+      onRequestClose={() => setPlaylistModalVisible(false)}
+    >
+      <Pressable
+        style={styles.modalOverlay}
+        onPress={() => setPlaylistModalVisible(false)}
+      >
+        <Pressable style={[styles.modalContent, styles.playlistModalContent]}>
+          <Text style={styles.modalTitle}>Salvar na playlist</Text>
+
+          {loadingPlaylists ? (
+            <ActivityIndicator size="small" color="#26516E" />
+          ) : userPlaylists.length === 0 ? (
+            <View style={styles.noPlaylistsContainer}>
+              <Text style={styles.noPlaylistsText}>
+                Nenhuma playlist encontrada.
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              data={userPlaylists}
+              keyExtractor={(item) => item.id.toString()}
+              style={styles.playlistList}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.playlistSelectorItem}
+                  onPress={() => handleAddToPlaylist(item.id)}
+                >
+                  <View style={styles.playlistSelectorInfo}>
+                    <Text style={styles.playlistSelectorName}>{item.nome}</Text>
+                    <Text style={styles.playlistSelectorCount}>
+                      {item.total_hinos || 0} hinos
+                    </Text>
+                  </View>
+                  <Text style={styles.addIcon}>+</Text>
+                </TouchableOpacity>
+              )}
+            />
+          )}
+
+          {showCreateFromHino ? (
+            <View style={styles.createInline}>
+              <TextInput
+                style={styles.createInlineInput}
+                placeholder="Nome da nova playlist"
+                placeholderTextColor="#5F8BA9"
+                value={newPlaylistName}
+                onChangeText={setNewPlaylistName}
+              />
+              <View style={styles.createInlineButtons}>
+                <TouchableOpacity
+                  style={styles.cancelSmallBtn}
+                  onPress={() => {
+                    setShowCreateFromHino(false);
+                    setNewPlaylistName("");
+                  }}
+                >
+                  <Text style={styles.cancelSmallText}>Cancelar</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.confirmSmallBtn,
+                    !newPlaylistName.trim() && styles.btnDisabled,
+                  ]}
+                  onPress={handleCreateFromHino}
+                  disabled={!newPlaylistName.trim()}
+                >
+                  <Text style={styles.confirmSmallText}>Criar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
             <TouchableOpacity
-              style={[
-                styles.modalBtn,
-                fontSize <= FONT_MIN && styles.fontBtnDisabled,
-              ]}
-              onPress={diminuirFonte}
-              disabled={fontSize <= FONT_MIN}
+              style={styles.createPlaylistBtn}
+              onPress={() => setShowCreateFromHino(true)}
             >
-              <Text style={styles.modalBtnText}>A-</Text>
+              <Text style={styles.createPlaylistBtnText}>
+                + Criar nova playlist
+              </Text>
             </TouchableOpacity>
-
-            <Text style={styles.modalSizeText}>{fontSize}</Text>
-
-            <TouchableOpacity
-              style={[
-                styles.modalBtn,
-                fontSize >= FONT_MAX && styles.fontBtnDisabled,
-              ]}
-              onPress={aumentarFonte}
-              disabled={fontSize >= FONT_MAX}
-            >
-              <Text style={styles.modalBtnText}>A+</Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.modalHint}>
-            Arraste para o lado para ajustar
-          </Text>
+          )}
         </Pressable>
       </Pressable>
     </Modal>
@@ -158,7 +330,7 @@ export default function HinoGeral({
         <TouchableOpacity
           onPress={() => navigateTo(previousScreen || "Hinario")}
         >
-          <Text style={styles.backButton}>&#60;</Text>
+          <Text style={[styles.backButton, { backgroundColor: dynamicStyles.backBtnBg }]}>&#60;</Text>
         </TouchableOpacity>
 
         <Text style={{ paddingLeft: 15, ...styles.h2 }}>Hinos Cristãos</Text>
@@ -167,13 +339,15 @@ export default function HinoGeral({
           style={styles.menuDots}
           onPress={() => setModalVisible(true)}
         >
-          <Text style={styles.menuDotsText}>...</Text>
+          <Text style={[styles.menuDotsText, { color: dynamicStyles.menuDotsColor }]}>...</Text>
         </TouchableOpacity>
       </View>
 
       {renderFontModal()}
 
-      <ScrollView style={styles.box}>
+      {renderPlaylistSelectorModal()}
+
+      <ScrollView style={[styles.box, { backgroundColor: dynamicStyles.containerBg }]}>
         <Text style={dynamicStyles.title}>{titulo}</Text>
         <Text style={dynamicStyles.autor}>{autor}</Text>
 
@@ -317,5 +491,130 @@ const styles = StyleSheet.create({
     fontFamily: "Nunito_500Medium",
     color: "#5F8BA9",
     marginTop: 16,
+  },
+  modalOptionBtn: {
+    width: "100%",
+    marginBottom: 10,
+  },
+  playlistOption: {
+    backgroundColor: "#1D4A6B",
+  },
+  cancelOptionBtn: {
+    marginTop: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+  },
+  cancelOptionText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 14,
+    color: "#5F8BA9",
+  },
+  playlistModalContent: {
+    maxHeight: "70%",
+  },
+  playlistList: {
+    width: "100%",
+    maxHeight: 220,
+  },
+  playlistSelectorItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "#26516E",
+    width: "100%",
+  },
+  playlistSelectorInfo: {
+    flex: 1,
+    marginRight: 8,
+  },
+  playlistSelectorName: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 14,
+    color: "#26516E",
+  },
+  playlistSelectorCount: {
+    fontFamily: "Nunito_500Medium",
+    fontSize: 11,
+    color: "#5F8BA9",
+    marginTop: 2,
+  },
+  addIcon: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#26516E",
+  },
+  noPlaylistsContainer: {
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  noPlaylistsText: {
+    fontFamily: "Nunito_500Medium",
+    fontSize: 14,
+    color: "#5F8BA9",
+    textAlign: "center",
+  },
+  createPlaylistBtn: {
+    marginTop: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    backgroundColor: "#26516E",
+    borderRadius: 8,
+    width: "100%",
+    alignItems: "center",
+  },
+  createPlaylistBtnText: {
+    fontFamily: "Poppins_700Bold",
+    fontSize: 14,
+    color: "#fff",
+  },
+  createInline: {
+    width: "100%",
+    marginTop: 12,
+  },
+  createInlineInput: {
+    backgroundColor: "#fff",
+    borderWidth: 2,
+    borderColor: "#26516E",
+    borderRadius: 8,
+    padding: 10,
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 13,
+    color: "#26516E",
+    marginBottom: 8,
+  },
+  createInlineButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 8,
+  },
+  cancelSmallBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    backgroundColor: "#E87676",
+  },
+  cancelSmallText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 12,
+    color: "#fff",
+  },
+  confirmSmallBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    backgroundColor: "#26516E",
+  },
+  confirmSmallText: {
+    fontFamily: "Poppins_600SemiBold",
+    fontSize: 12,
+    color: "#fff",
+  },
+  btnDisabled: {
+    opacity: 0.4,
   },
 });

@@ -1,11 +1,12 @@
 import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, FlatList, Dimensions, ActivityIndicator } from 'react-native';
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import HymnCard from '../components/HymnCard';
+import PlaylistCard from '../components/PlaylistCard';
 import { useHymns } from '../../src/hooks/useHymns';
 import { AuthContext } from '../../src/contexts/AuthContext';
 import { HinarioContext } from '../../src/contexts/HinarioContext';
 import { useSection } from '../../src/contexts/SectionContext';
-import { fetchHinosByHinario } from '../../src/api/api';
+import { fetchHinosByHinario, getUserPlaylists } from '../../src/api/api';
 import { getRecentlyViewed as loadRecentlyViewed, saveRecentlyViewed } from '../../src/services/recentlyViewed';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -103,6 +104,8 @@ export default function Dashboard({ navigateTo }) {
   const [newReleases, setNewReleases] = useState([]);
   const [popularHymns, setPopularHymns] = useState([]);
   const [classicHymns, setClassicHymns] = useState([]);
+  const [userPlaylists, setUserPlaylists] = useState([]);
+  const [loadingPlaylists, setLoadingPlaylists] = useState(true);
   const [loadingSections, setLoadingSections] = useState({
     recentlyViewed: true,
     newReleases: true,
@@ -238,6 +241,29 @@ export default function Dashboard({ navigateTo }) {
     return () => { cancelled = true; };
   }, [hinario, hymns, hymnsLoading]);
 
+  // Carregar playlists do usuário
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadPlaylists = async () => {
+      try {
+        const data = await getUserPlaylists(userId);
+        if (!cancelled) setUserPlaylists(data || []);
+      } catch (error) {
+        console.error('Erro ao carregar playlists na dashboard:', error);
+      } finally {
+        if (!cancelled) setLoadingPlaylists(false);
+      }
+    };
+
+    loadPlaylists();
+    return () => { cancelled = true; };
+  }, [userId]);
+
+  const handlePlaylistPress = (playlist) => {
+    navigateTo('MinhaBiblioteca', null, null, 'Dashboard');
+  };
+
   if (hymnsLoading) {
     return (
       <View style={[styles.container, styles.loadingContainer]}>
@@ -282,6 +308,35 @@ export default function Dashboard({ navigateTo }) {
         <HinarioCard hinarioKey="CCB" info={HINARIO_INFO.CCB} onPress={() => handleHinarioPress('CCB')} />
         <HinarioCard hinarioKey="GERAL" info={HINARIO_INFO.GERAL} onPress={() => handleHinarioPress('GERAL')} />
       </View> */}
+
+      {/* Seção Minha Biblioteca */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Minha Biblioteca</Text>
+          <TouchableOpacity onPress={() => navigateTo('MinhaBiblioteca', null, null, 'Dashboard')}>
+            <Text style={styles.seeAllText}>Ver todas</Text>
+          </TouchableOpacity>
+        </View>
+        {loadingPlaylists ? (
+          <ActivityIndicator size="small" color="#FFCB69" />
+        ) : userPlaylists.length === 0 ? (
+          <Text style={styles.emptyPlaylistsText}>Nenhuma playlist criada.</Text>
+        ) : (
+          <FlatList
+            data={userPlaylists}
+            renderItem={({ item }) => (
+              <PlaylistCard
+                playlist={item}
+                onPress={() => handlePlaylistPress(item)}
+              />
+            )}
+            keyExtractor={item => item.id.toString()}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+          />
+        )}
+      </View>
 
       {/* Seção de Hinos Recentemente Vistos */}
       <Section
@@ -437,6 +492,12 @@ const styles = StyleSheet.create({
   },
   horizontalList: {
     paddingRight: 16,
+  },
+  emptyPlaylistsText: {
+    color: '#666',
+    fontSize: 14,
+    fontStyle: 'italic',
+    paddingLeft: 4,
   },
   loadingContainer: {
     flex: 1,

@@ -38,6 +38,7 @@ import hinarioGrupo from './screens/hinoComp';
 import Componentes from './screens/componentes';
 import AdicionarComp from './screens/adicionarComp';
 import Notificacoes from './screens/notificacoes';
+import MinhaBiblioteca from './screens/MinhaBiblioteca';
 import MenuInferiorAdorador from './components/MenuInferior';
 import MenuInferiorReg from './components/MenuInferiorReg';
 import MenuInferiorComp from './components/MenuInferiorComp';
@@ -51,31 +52,31 @@ const userScreens = {
     dashboard: Dashboard,
     menuSuperior: MenuSuperiorAdorador,
     menuInferior: MenuInferiorAdorador,
-    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection],
+    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection, MinhaBiblioteca],
   },
   Músico: {
     dashboard: Dashboard,
     menuSuperior: MenuSuperiorAdorador,
     menuInferior: MenuInferiorAdorador,
-    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection],
+    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection, MinhaBiblioteca],
   },
   Cantor: {
     dashboard: DashboardCantor,
     MenuSuperior: MenuSuperiorAdorador,
     menuInferior: MenuInferiorAdorador,
-    screens: [EventosCantor, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection],
+    screens: [EventosCantor, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection, MinhaBiblioteca],
   },
   Regente: {
     dashboard: DashboardGrupo,
     menuSuperior: MenuSuperiorGrupo,
     menuInferior: MenuInferiorReg,
-    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, EnsaiosReg,AdicionarEnsaio, EventosReg, AdicionarEvento, GrupoReg, HinarioReg, hinarioGrupo, AdicionarHino, Componentes, AdicionarComp, Adoracao, Pesquisa, Favoritos, MaisReg, CriarGrupo, Notificacoes, MudarHinario, HymnsSection],
+    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, EnsaiosReg,AdicionarEnsaio, EventosReg, AdicionarEvento, GrupoReg, HinarioReg, hinarioGrupo, AdicionarHino, Componentes, AdicionarComp, Adoracao, Pesquisa, Favoritos, MaisReg, CriarGrupo, Notificacoes, MudarHinario, HymnsSection, MinhaBiblioteca],
   },
   Componente: {
     dashboard: DashboardGrupo,
     menuSuperior: MenuSuperiorGrupo,
     menuInferior: MenuInferiorComp,
-    screens: [EnsaiosComp, EventosComp, GrupoComp, HinarioComp, hinarioGrupo, Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, MaisComp, Notificacoes, MudarHinario, HymnsSection],
+    screens: [EnsaiosComp, EventosComp, GrupoComp, HinarioComp, hinarioGrupo, Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, MaisComp, Notificacoes, MudarHinario, HymnsSection, MinhaBiblioteca],
   },
 };
 

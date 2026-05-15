@@ -20,6 +20,14 @@ export default function Adoracao({ navigateTo }) {
           <Text style={{paddingLeft: 15, ...styles.h2}}>Adoração</Text>
 
           <View style={styles.cards}>
+            <TouchableOpacity onPress={() => navigateTo('MinhaBiblioteca')} style={{...styles.card, backgroundColor: "#EDEDED",}}>
+              <Image source={require('../../assets/images/headphone.jpg')} style={styles.image}/>
+              <View style={{justifyContent: "center", paddingLeft: 15}}>
+                <Text style={{...styles.cardTitle, color: "#101010"}}>Minha Biblioteca</Text>
+                <Text style={{...styles.cardTxt, color: "#2E2E2E"}}>Suas playlists personalizadas {'\n'}com seus hinos favoritos!</Text>
+              </View>
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={() => navigateTo('Harpa')} style={{...styles.card, backgroundColor: "#FFFAE1",}}>             
               <Image source={require('../../assets/images/harpa-crista.jpg')} style={styles.image}/>
               <View style={{justifyContent: "center", paddingLeft: 15}}>
@@ -28,8 +36,7 @@ export default function Adoracao({ navigateTo }) {
               </View>              
             </TouchableOpacity> 
             
-
-            <TouchableOpacity onPress={() => navigateTo('Hinario')} style={{...styles.card, backgroundColor: "#F1FBFF",}}> 
+            <TouchableOpacity onPress={() => navigateTo('Hinario')} style={{...styles.card, backgroundColor: "#F1FBFF",}}>
               <Image source={require('../../assets/images/homem-cantando.jpg')} style={styles.image}/>
               <View style={{justifyContent: "center", paddingLeft: 15}}>
                 <Text style={{...styles.cardTitle, color: "#26516E"}}>Hinos Cristãos</Text>

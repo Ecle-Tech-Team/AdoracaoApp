@@ -279,7 +279,7 @@ export const registerPushToken = async (token, id_user = null) => {
   try {
     const data = { token };
     // Sempre enviar id_user, mesmo se for null
-    data.id_user = id_user;  
+    data.id_user = id_user;
 
     const response = await api.post('/push-token', data);
     return response.data;
@@ -287,4 +287,48 @@ export const registerPushToken = async (token, id_user = null) => {
     console.error('Erro ao registrar token push:', error.response?.data || error.message);
     throw error;
   }
+};
+
+/* =========================
+   PLAYLISTS
+========================= */
+
+export const createPlaylist = async (userId, nome, descricao) => {
+  const response = await api.post('/playlists', { userId, nome, descricao });
+  return response.data;
+};
+
+export const getUserPlaylists = async (userId) => {
+  const response = await api.get(`/playlists/${userId}`);
+  return response.data;
+};
+
+export const getPlaylistById = async (userId, playlistId) => {
+  const response = await api.get(`/playlists/${userId}/${playlistId}`);
+  return response.data;
+};
+
+export const updatePlaylist = async (playlistId, userId, nome, descricao) => {
+  const response = await api.put(`/playlists/${playlistId}`, { userId, nome, descricao });
+  return response.data;
+};
+
+export const deletePlaylist = async (userId, playlistId) => {
+  const response = await api.delete(`/playlists/${userId}/${playlistId}`);
+  return response.data;
+};
+
+export const addHinoToPlaylist = async (playlistId, userId, hinoId, tipoHino) => {
+  const response = await api.post(`/playlists/${playlistId}/hinos`, { userId, hinoId, tipoHino });
+  return response.data;
+};
+
+export const removeHinoFromPlaylist = async (userId, playlistId, hinoId, tipoHino) => {
+  const response = await api.delete(`/playlists/${userId}/${playlistId}/hinos/${hinoId}/${tipoHino}`);
+  return response.data;
+};
+
+export const getPlaylistHinos = async (userId, playlistId) => {
+  const response = await api.get(`/playlists/${userId}/${playlistId}`);
+  return response.data;
 };
