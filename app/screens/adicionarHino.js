@@ -2,9 +2,11 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, FlatList } 
 import React, { useState, useEffect, useContext } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchHinosGeral, fetchHinarioGrupo } from '../../src/api/api'; 
+import { fetchHinosGeral, fetchHinarioGrupo } from '../../src/api/api';
 import { AuthContext } from '../../src/contexts/AuthContext';
 import axios from 'axios';
+
+const TAGS = ['Ceia', 'Missões', 'Família', 'Batismo', 'Natal', 'Páscoa'];
 
 export default function AdicionarHino({ navigateTo }) {
     const { id_grupo } = useContext(AuthContext);
@@ -12,16 +14,13 @@ export default function AdicionarHino({ navigateTo }) {
     const [filteredHinos, setFilteredHinos] = useState([]);
     const [searchText, setSearchText] = useState('');
     const [hinosExistentes, setHinosExistentes] = useState([]);
+    const [selectedTag, setSelectedTag] = useState('');
 
     useEffect(() => {
-      // Busca os hinos do hinário do grupo para evitar duplicação
       const loadHinarioGrupo = async () => {
         try {
           const existingHinos = await fetchHinarioGrupo(id_grupo);
-
-          // ✅ GARANTIA DE ARRAY
           const safeHinos = Array.isArray(existingHinos) ? existingHinos : [];
-
           setHinosExistentes(safeHinos.map(hino => hino._id));
         } catch (error) {
           console.error('Erro ao carregar o hinário do grupo:', error);
@@ -29,8 +28,6 @@ export default function AdicionarHino({ navigateTo }) {
         }
       };
 
-  
-      // Carrega todos os hinos disponíveis para adição
       const loadHinos = async () => {
         try {
           const allHinos = await fetchHinosGeral();
@@ -40,27 +37,26 @@ export default function AdicionarHino({ navigateTo }) {
           console.error('Erro ao carregar hinos:', error);
         }
       };
-  
+
       loadHinarioGrupo();
       loadHinos();
     }, [id_grupo]);
-    
-    const addHinoToGrupo = async (id_grupo, hinoId) => {
+
+    const addHinoToGrupo = async (id_grupo, hinoId, tag) => {
       try {
-        const response = await axios.post(`https://api.adoracaoapp.com.br/grupo/${id_grupo}/hinos`, { hinoId });
+        const response = await axios.post(`https://api.adoracaoapp.com.br/grupo/${id_grupo}/hinos`, { hinoId, tag });
         return response.data;
       } catch (error) {
         console.error('Erro ao adicionar hino ao grupo:', error);
         throw error;
       }
     };
-    
+
     const handleAddHino = async (hinoId) => {
         try {
-          await addHinoToGrupo(id_grupo, hinoId);
+          await addHinoToGrupo(id_grupo, hinoId, selectedTag || null);
           Alert.alert('Sucesso', 'Hino adicionado ao grupo com sucesso!');
-          
-          // Atualiza os estados para remover o hino adicionado da lista visível
+
           setHinosExistentes([...hinosExistentes, hinoId]);
           setFilteredHinos(filteredHinos.filter(hino => hino._id !== hinoId));
         } catch (error) {
@@ -74,31 +70,53 @@ export default function AdicionarHino({ navigateTo }) {
     };
 
     useEffect(() => {
-      const filtered = hinos.filter(hino => 
-        !hinosExistentes.includes(hino._id) && 
-        (removeAccents(hino.titulo.toLowerCase()).includes(removeAccents(searchText.toLowerCase())) || 
+      const filtered = hinos.filter(hino =>
+        !hinosExistentes.includes(hino._id) &&
+        (removeAccents(hino.titulo.toLowerCase()).includes(removeAccents(searchText.toLowerCase())) ||
         hino.numero.toString().includes(searchText))
       );
       setFilteredHinos(filtered);
     }, [searchText, hinos, hinosExistentes]);
-    
+
     const [fontLoaded] = useFonts({
         Nunito_500Medium,
         Poppins_600SemiBold,
         Poppins_700Bold
     });
-    
+
     if (!fontLoaded) {
         return null;
     }
-    
+
   return (
     <View>
       <View style={styles.titleContainer}>
         <TouchableOpacity onPress={() => navigateTo('HinarioReg')}>
           <Text style={styles.backButton}>&#60;</Text>
-        </TouchableOpacity>    
+        </TouchableOpacity>
         <Text style={{ paddingLeft: 15, ...styles.h2 }}>Adicionar Hino</Text>
+      </View>
+
+      {/* Seletor de tag */}
+      <View style={styles.tagSelector}>
+        <Text style={styles.tagLabel}>Categoria (opcional):</Text>
+        <View style={styles.tagRow}>
+          {TAGS.map((tag) => (
+            <TouchableOpacity
+              key={tag}
+              style={[
+                styles.tagChip,
+                selectedTag === tag && styles.tagChipSelected,
+              ]}
+              onPress={() => setSelectedTag(selectedTag === tag ? '' : tag)}
+            >
+              <Text style={[
+                styles.tagChipText,
+                selectedTag === tag && styles.tagChipTextSelected,
+              ]}>{tag}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
       <TextInput
@@ -110,7 +128,7 @@ export default function AdicionarHino({ navigateTo }) {
 
       <FlatList
         data={filteredHinos}
-        keyExtractor={(item) => item._id} 
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <View style={styles.hinoContainer}>
             <Text style={styles.hinoText}>{item.titulo} - {item.autor}</Text>
@@ -145,12 +163,46 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 5
   },
+  tagSelector: {
+    paddingHorizontal: 15,
+    paddingVertical: 12,
+  },
+  tagLabel: {
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#555',
+    marginBottom: 8,
+  },
+  tagRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  tagChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#FFFAE1',
+    borderWidth: 1.5,
+    borderColor: '#FFCB69',
+  },
+  tagChipSelected: {
+    backgroundColor: '#FFCB69',
+  },
+  tagChipText: {
+    fontSize: 13,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#BA9D36',
+  },
+  tagChipTextSelected: {
+    color: '#fff',
+  },
   searchBar: {
     padding: 18,
     backgroundColor: '#FFFAE1',
     borderWidth: 2,
     borderColor: '#FFCB69',
-    fontFamily: 'Poppins_600SemiBold', 
+    fontFamily: 'Poppins_600SemiBold',
     marginHorizontal: 5,
     marginTop: 10,
     marginBottom: 12,
@@ -171,6 +223,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_600SemiBold',
     color: '#BA9D36',
     marginHorizontal: 5,
+    flex: 1,
   },
   addButton: {
     backgroundColor: '#FFCB69',

@@ -1,35 +1,83 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View, Image, TouchableOpacity, Alert, ActivityIndicator } from 'react-native'
+import React, { useContext, useEffect, useState } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
-import { Poppins_700Bold } from '@expo-google-fonts/poppins';
+import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
+import { AuthContext } from '../../src/contexts/AuthContext';
+import { fetchGrupo } from '../../src/api/api';
 
 export default function GrupoReg({ navigateTo }) {
+  const { id_grupo } = useContext(AuthContext);
+  const [grupoNome, setGrupoNome] = useState('');
+  const [loadingGrupo, setLoadingGrupo] = useState(true);
   const [fontLoaded] = useFonts({
     Nunito_500Medium,
-    Poppins_700Bold
+    Poppins_700Bold,
+    Poppins_600SemiBold,
   })
+
+  useEffect(() => {
+    if (!fontLoaded) return;
+
+    if (!id_grupo) {
+      setLoadingGrupo(false);
+      Alert.alert(
+        'Grupo não encontrado',
+        'Você ainda não criou ou entrou em um grupo. Deseja criar um agora?',
+        [
+          { text: 'Agora não', style: 'cancel' },
+          {
+            text: 'Criar Grupo',
+            onPress: () => navigateTo('CriarGrupo', { criarGrupo: true })
+          },
+        ]
+      );
+    } else {
+      const loadGrupo = async () => {
+        try {
+          const data = await fetchGrupo(id_grupo);
+          setGrupoNome(data.nome || '');
+        } catch (error) {
+          console.error('Erro ao carregar dados do grupo:', error);
+        } finally {
+          setLoadingGrupo(false);
+        }
+      };
+      loadGrupo();
+    }
+  }, [id_grupo, fontLoaded]);
 
   if (!fontLoaded) {
     return null;
   };
-  
+
   return (
     <View>
       <View>
         <View>
-          <Text style={{paddingLeft: 15, ...styles.h2}}>Grupo</Text>
+          {/* Cabeçalho com nome do grupo */}
+          <View style={styles.headerContainer}>
+            <Text style={{paddingLeft: 15, ...styles.h2}}>Grupo</Text>
+            {loadingGrupo ? (
+              <ActivityIndicator size="small" color="#FFCB69" style={{ marginLeft: 15 }} />
+            ) : grupoNome ? (
+              <View style={styles.grupoInfo}>
+                <Image source={require('../../assets/icons/grupo.png')} style={styles.grupoIcon} />
+                <Text style={styles.grupoNome}>{grupoNome}</Text>
+              </View>
+            ) : null}
+          </View>
 
           <View style={styles.cards}>
-            <TouchableOpacity onPress={() => navigateTo('HinarioReg')} style={{...styles.card, backgroundColor: "#FFFAE1",}}>             
+            <TouchableOpacity onPress={() => navigateTo('HinarioReg')} style={{...styles.card, backgroundColor: "#FFFAE1",}}>
               <Image source={require('../../assets/images/hinario-grupo.jpg')} style={styles.image}/>
               <View style={{justifyContent: "center", paddingLeft: 15}}>
                 <Text style={{...styles.cardTitle, color: "#BA9D36"}}>Hinário</Text>
                 <Text style={{...styles.cardTxt, color: "#B8AB7D"}}>Pasta com todos os hinos {'\n'}do grupo.</Text>
-              </View>              
-            </TouchableOpacity> 
-            
+              </View>
+            </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigateTo('EnsaiosReg')} style={{...styles.card, backgroundColor: "#F1FBFF",}}> 
+
+            <TouchableOpacity onPress={() => navigateTo('EnsaiosReg')} style={{...styles.card, backgroundColor: "#F1FBFF",}}>
               <Image source={require('../../assets/images/ensaio.jpg')} style={styles.image}/>
               <View style={{justifyContent: "center", paddingLeft: 15}}>
                 <Text style={{...styles.cardTitle, color: "#26516E"}}>Ensaio</Text>
@@ -37,7 +85,7 @@ export default function GrupoReg({ navigateTo }) {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigateTo('EventosReg')} style={{...styles.card, backgroundColor: "#FFE9E9",}}> 
+            <TouchableOpacity onPress={() => navigateTo('EventosReg')} style={{...styles.card, backgroundColor: "#FFE9E9",}}>
               <Image source={require('../../assets/images/eventos.jpg')} style={styles.image}/>
               <View style={{justifyContent: "center", paddingLeft: 15}}>
                 <Text style={{...styles.cardTitle, color: "#FF8282"}}>Eventos</Text>
@@ -45,13 +93,13 @@ export default function GrupoReg({ navigateTo }) {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => navigateTo('Componentes')} style={{...styles.card, backgroundColor: "#E2FFE3",}}> 
+            <TouchableOpacity onPress={() => navigateTo('Componentes')} style={{...styles.card, backgroundColor: "#E2FFE3",}}>
               <Image source={require('../../assets/images/componentes.jpg')} style={styles.image}/>
               <View style={{justifyContent: "center", paddingLeft: 15}}>
                 <Text style={{...styles.cardTitle, color: "#459041"}}>Componentes</Text>
                 <Text style={{...styles.cardTxt, color: "#64A95F"}}>Veja todos os membros do grupo {'\n'} de louvor.</Text>
               </View>
-            </TouchableOpacity> 
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -62,12 +110,12 @@ export default function GrupoReg({ navigateTo }) {
 const styles = StyleSheet.create({
   h2: {
     fontSize: 24,
-    fontFamily: 'Poppins_700Bold'    
+    fontFamily: 'Poppins_700Bold'
   },
   h3: {
     fontSize: 14,
     fontFamily: 'Nunito_500Medium',
-    color: '#BFBFBF',    
+    color: '#BFBFBF',
   },
   txt: {
     fontSize: 14,
@@ -75,13 +123,34 @@ const styles = StyleSheet.create({
     color: '#BFBFBF',
     lineHeight: 14
   },
+  headerContainer: {
+    paddingTop: 10,
+    paddingBottom: 5,
+  },
+  grupoInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 15,
+    marginTop: 4,
+  },
+  grupoIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 8,
+    tintColor: '#FFCB69',
+  },
+  grupoNome: {
+    fontSize: 16,
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#555',
+  },
   cards: {
     paddingTop: 10,
   },
   card: {
     marginVertical: 10,
     marginHorizontal: 10,
-    borderRadius: 10,    
+    borderRadius: 10,
     display: "flex",
     flexDirection: 'row'
   },

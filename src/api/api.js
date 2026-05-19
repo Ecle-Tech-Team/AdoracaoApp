@@ -110,8 +110,18 @@ export const fetchHinarioGrupo = async (id_grupo) => {
   return response.data;
 };
 
+export const fetchGrupo = async (id_grupo) => {
+  const response = await api.get(`/grupo/${id_grupo}`);
+  return response.data;
+};
+
 export const removeHinoFromGrupo = async (id_grupo, id_hino) => {
   const response = await api.delete(`/grupo/${id_grupo}/hinos/${id_hino}`);
+  return response.data;
+};
+
+export const updateHinoTag = async (id_grupo, hinoId, tag) => {
+  const response = await api.put(`/grupo/${id_grupo}/hinos/${hinoId}/tag`, { tag });
   return response.data;
 };
 

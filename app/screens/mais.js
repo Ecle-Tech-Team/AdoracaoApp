@@ -1,15 +1,23 @@
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native'
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
 import { AuthContext } from '../../src/contexts/AuthContext';
 
-export default function Mais({ navigateTo }) {
-  const { logout } = useContext(AuthContext);
+export default function Mais({ navigateTo, routeParams }) {
+  const { logout, id_grupo } = useContext(AuthContext);
   const [fontLoaded] = useFonts({
     Nunito_500Medium,
     Poppins_700Bold, Poppins_600SemiBold
   })
+
+  useEffect(() => {
+    if (!fontLoaded) return;
+
+    if (routeParams?.criarGrupo) {
+      navigateTo('CriarGrupo');
+    }
+  }, [fontLoaded, routeParams?.criarGrupo]);
 
   if (!fontLoaded) {
     return null;
@@ -24,7 +32,13 @@ export default function Mais({ navigateTo }) {
             <TouchableOpacity style={styles.item} activeOpacity={0.7}>
               <Text style={styles.txt}>Editar Perfil</Text>
             </TouchableOpacity>
-            
+
+            {!id_grupo && (
+              <TouchableOpacity onPress={() => navigateTo('CriarGrupo')} style={styles.item} activeOpacity={0.7}>
+                <Text style={styles.txt}>Criar Grupo</Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity style={styles.item} activeOpacity={0.7}>
               <Text style={styles.txt}>Redefinir Senha</Text>
             </TouchableOpacity>

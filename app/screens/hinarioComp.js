@@ -6,7 +6,7 @@ import { fetchHinarioGrupo } from '../../src/api/api';
 import { AuthContext } from '../../src/contexts/AuthContext';
 
 export default function HinarioComp({ navigateTo }) {
-  const { id_grupo } = useContext(AuthContext); 
+  const { id_grupo } = useContext(AuthContext);
   const [hinosGrupo, setHinosGrupo] = useState([]);
   const [filteredHinos, setFilteredHinos] = useState([]);
   const [searchText, setSearchText] = useState('');
@@ -17,13 +17,13 @@ export default function HinarioComp({ navigateTo }) {
         const data = await fetchHinarioGrupo(id_grupo);
         const safeData = Array.isArray(data) ? data : [];
         setHinosGrupo(safeData);
-        setFilteredHinos(safeData); 
+        setFilteredHinos(safeData);
       } catch (error) {
         console.error('Erro ao obter hinos:', error);
       }
     };
     getHinario();
-    
+
   }, [id_grupo]);
 
   const removeAccents = (str) => {
@@ -31,14 +31,14 @@ export default function HinarioComp({ navigateTo }) {
   };
 
   useEffect(() => {
-    if (Array.isArray(hinosGrupo)) { // Verifica se hinosGrupo é um array
+    if (Array.isArray(hinosGrupo)) {
       const filtered = hinosGrupo.filter((hino) =>
         (hino.titulo && removeAccents(hino.titulo.toLowerCase()).includes(removeAccents(searchText.toLowerCase()))) ||
         (hino.numero && hino.numero.toString().includes(searchText))
       );
       setFilteredHinos(filtered);
     } else {
-      setFilteredHinos([]); // Evita erros caso hinosGrupo não seja um array
+      setFilteredHinos([]);
     }
   }, [searchText, hinosGrupo]);
 
@@ -51,7 +51,7 @@ export default function HinarioComp({ navigateTo }) {
   if (!fontLoaded) {
     return null;
   };
-  
+
 
   return (
     <View>
@@ -59,7 +59,7 @@ export default function HinarioComp({ navigateTo }) {
         <View style={styles.titleContainer}>
           <TouchableOpacity onPress={() => navigateTo('GrupoComp')}>
             <Text style={styles.backButton}>&#60;</Text>
-          </TouchableOpacity>    
+          </TouchableOpacity>
 
           <Text style={{paddingLeft: 15, ...styles.h2}}>Hinário</Text>
         </View>
@@ -74,15 +74,23 @@ export default function HinarioComp({ navigateTo }) {
           {filteredHinos.length > 0 ? (
             filteredHinos.map((hino) => (
               <TouchableOpacity
-                key={hino.numero}                
+                key={hino.numero}
+                style={styles.lista}
                 data={filteredHinos}
                 onPress={() => navigateTo('HinarioGrupo', hino)}
               >
-                <Text style={styles.item}>{hino.titulo} - {hino.autor}</Text>                
+                <View style={styles.hinoContent}>
+                  <Text style={styles.item}>{hino.titulo} - {hino.autor}</Text>
+                  {hino.tag ? (
+                    <View style={styles.tagBadge}>
+                      <Text style={styles.tagBadgeText}>{hino.tag}</Text>
+                    </View>
+                  ) : null}
+                </View>
               </TouchableOpacity>
             ))
           ) : (
-            <Text>Nenhum hino encontrado.</Text>
+            <Text style={styles.emptyText}>Nenhum hino encontrado.</Text>
           )}
         </View>
       </View>
@@ -93,15 +101,15 @@ export default function HinarioComp({ navigateTo }) {
 const styles = StyleSheet.create({
   h2: {
     fontSize: 24,
-    fontFamily: 'Poppins_700Bold',  
-    marginBottom: 15  
+    fontFamily: 'Poppins_700Bold',
+    marginBottom: 15
   },
   searchBar: {
     padding: 18,
     backgroundColor: '#FFFAE1',
     borderWidth: 2,
     borderColor: '#FFCB69',
-    fontFamily: 'Poppins_600SemiBold', 
+    fontFamily: 'Poppins_600SemiBold',
     marginHorizontal: 5,
     marginBottom: 12,
     borderRadius: 12,
@@ -111,23 +119,50 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 20,
   },
+  hinoContent: {
+    flex: 1,
+    flexDirection: 'column',
+  },
   item: {
     padding: 18,
+    paddingBottom: 8,
     marginHorizontal: 5,
-    marginBottom: 12,
-    borderRadius: 10,
+    marginBottom: 0,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
     backgroundColor: '#FFFAE1',
-    fontFamily: 'Poppins_600SemiBold',  
-    color: '#BA9D36'
+    fontFamily: 'Poppins_600SemiBold',
+    color: '#BA9D36',
+  },
+  tagBadge: {
+    backgroundColor: '#FFCB69',
+    alignSelf: 'flex-end',
+    paddingHorizontal: 14,
+    paddingVertical: 4,
+    borderTopLeftRadius: 8,
+    borderBottomRightRadius: 10,
+    marginTop: -4,
+    marginRight: 5,
+  },
+  tagBadgeText: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: 'Poppins_600SemiBold',
   },
   title: {
     fontSize: 18,
-  },    
-  titleContainer:{
+  },
+  titleContainer: {
     paddingVertical: 10,
     paddingLeft: 10,
     display: 'flex',
     flexDirection: 'row'
+  },
+  lista: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
   },
   backButton: {
     fontSize: 28,
@@ -138,5 +173,11 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
     paddingHorizontal: 14,
     borderRadius: 5
+  },
+  emptyText: {
+    color: '#666',
+    fontSize: 14,
+    fontStyle: 'italic',
+    paddingLeft: 10,
   },
 })
