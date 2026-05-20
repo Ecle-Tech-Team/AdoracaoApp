@@ -126,7 +126,7 @@ export default function HinarioReg({ navigateTo }) {
         <Text style={{paddingLeft: 15, ...styles.h2}}>Hinário</Text>
 
         <TouchableOpacity onPress={() => navigateTo('AdicionarHino')}>
-          <Text style={{...styles.backButton, ...styles.btn}}>+</Text>
+          <Text style={styles.backButton}>+</Text>
         </TouchableOpacity>
       </View>
 
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   h2: {
     fontSize: 24,
     fontFamily: 'Poppins_700Bold',
-    marginBottom: 15
+    flex: 1,
   },
   searchBar: {
     padding: 18,
@@ -354,9 +354,9 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     paddingVertical: 10,
-    paddingLeft: 10,
-    display: 'flex',
-    flexDirection: 'row'
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   backButton: {
     fontSize: 28,
@@ -367,12 +367,6 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
     paddingHorizontal: 14,
     borderRadius: 5
-  },
-  btn: {
-    display: 'flex',
-    flexDirection: 'row',
-    position: 'absolute',
-    left: 195
   },
   emptyText: {
     color: '#666',

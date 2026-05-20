@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const { width: screenWidth } = Dimensions.get('window');
+const isLargeScreen = screenWidth > 600;
 
 const Section = ({ title, data, onItemPress, onSeeAllPress, loading, hinarioType }) => {
   if (loading) {
@@ -291,7 +292,7 @@ export default function DashboardGrupo({ navigateTo }) {
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Próximas Atividades</Text>
           <TouchableOpacity onPress={() => navigateTo('GrupoReg')}>
-            <Text style={styles.seeAllText}>Gerenciar</Text>
+            <Text style={styles.seeAllText}>Ver todas</Text>
           </TouchableOpacity>
         </View>
 
@@ -300,13 +301,32 @@ export default function DashboardGrupo({ navigateTo }) {
         ) : proximasAtividades.length === 0 ? (
           <Text style={styles.emptyText}>Nenhuma atividade futura agendada.</Text>
         ) : (
-          proximasAtividades.map((item) => (
-            <AtividadeCard
-              key={`${item.tipo}-${item.id}`}
-              item={item}
-              onPress={() => handleAtividadePress(item)}
-            />
-          ))
+          <>
+            {(() => {
+              const maxVisible = isLargeScreen ? 3 : 2;
+              const visible = proximasAtividades.slice(0, maxVisible);
+              const remaining = proximasAtividades.length - maxVisible;
+
+              return (
+                <>
+                  {visible.map((item) => (
+                    <AtividadeCard
+                      key={`${item.tipo}-${item.id}`}
+                      item={item}
+                      onPress={() => handleAtividadePress(item)}
+                    />
+                  ))}
+                  {remaining > 0 && (
+                    <TouchableOpacity onPress={() => navigateTo('GrupoReg')}>
+                      <Text style={styles.maisAtividadesText}>
+                        +{remaining} {remaining === 1 ? 'atividade' : 'atividades'} nessa semana
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </>
+              );
+            })()}
+          </>
         )}
       </View>
 
@@ -437,5 +457,12 @@ const styles = StyleSheet.create({
   atividadeLocal: {
     fontSize: 14,
     fontFamily: 'Nunito_500Medium',
+  },
+  maisAtividadesText: {
+    color: '#FFCB69',
+    fontSize: 14,
+    fontFamily: 'Poppins_600SemiBold',
+    textAlign: 'center',
+    marginTop: 6,
   },
 });

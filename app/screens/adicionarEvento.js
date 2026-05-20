@@ -13,11 +13,12 @@ import {
   Poppins_700Bold,
   Poppins_600SemiBold,
 } from "@expo-google-fonts/poppins";
-import { createEvento, fetchHinarioGrupo } from "../../src/api/api";
+import { createEvento, fetchHinarioGrupo, updateEvento } from "../../src/api/api";
 import { AuthContext } from "../../src/contexts/AuthContext";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { saveRecentAddress, getRecentAddresses } from "../../src/services/recentAddresses";
 
-export default function AdicionarEvento({ navigateTo }) {
+export default function AdicionarEvento({ navigateTo, editData }) {
   const { id_grupo } = useContext(AuthContext);
   const [hinosDisponiveis, setHinosDisponiveis] = useState([]);
   const [hinosFiltrados, setHinosFiltrados] = useState([]);
@@ -29,6 +30,8 @@ export default function AdicionarEvento({ navigateTo }) {
 
   const [hinosSelecionados, setHinosSelecionados] = useState([]);
   const [pesquisa, setPesquisa] = useState("");
+  const [recentAddresses, setRecentAddresses] = useState([]);
+  const [showAddresses, setShowAddresses] = useState(false);
 
   useEffect(() => {
     const loadHinos = async () => {
@@ -43,7 +46,26 @@ export default function AdicionarEvento({ navigateTo }) {
     loadHinos();
   }, [id_grupo]);
 
-  const handleCreateEvento = async () => {
+  useEffect(() => {
+    const loadAddresses = async () => {
+      const addresses = await getRecentAddresses(id_grupo, 5);
+      setRecentAddresses(addresses);
+    };
+    loadAddresses();
+  }, [id_grupo]);
+
+  useEffect(() => {
+    if (editData) {
+      setDescricao(editData.descricao || "");
+      setLocal(editData.local || "");
+      setDataHora(editData.data ? (() => {
+        const parts = editData.data.split(/[- :T]/);
+        return new Date(parts[0], parts[1] - 1, parts[2], parts[3] || 0, parts[4] || 0);
+      })() : null);
+    }
+  }, [editData]);
+
+  const handleSubmit = async () => {
     if (!dataHora || !descricao || !local) {
       Alert.alert("Erro", "Todos os campos são obrigatórios.");
       return;
@@ -51,20 +73,23 @@ export default function AdicionarEvento({ navigateTo }) {
 
     try {
       const hinoIds = hinosSelecionados.length > 0 ? hinosSelecionados : null;
-      await createEvento(
-        id_grupo,
-        formatDateTimeSQL(dataHora),
-        descricao,
-        local,
-        hinoIds,
-      );
-      Alert.alert("Sucesso", "Evento criado com sucesso!");
-      setDataHora("");
-      setDescricao("");
-      setLocal("");
-      setHinosSelecionados([]);
+      const formatDate = formatDateTimeSQL(dataHora);
+
+      if (editData) {
+        await updateEvento(editData.id, formatDate, descricao, local, hinoIds);
+        Alert.alert("Sucesso", "Evento atualizado com sucesso!");
+        navigateTo("EventosReg");
+      } else {
+        await createEvento(id_grupo, formatDate, descricao, local, hinoIds);
+        Alert.alert("Sucesso", "Evento criado com sucesso!");
+        saveRecentAddress(local, id_grupo);
+        setDataHora("");
+        setDescricao("");
+        setLocal("");
+        setHinosSelecionados([]);
+      }
     } catch (error) {
-      Alert.alert("Erro", "Erro ao criar evento.");
+      Alert.alert("Erro", editData ? "Erro ao atualizar evento." : "Erro ao criar evento.");
     }
   };
 
@@ -86,7 +111,14 @@ export default function AdicionarEvento({ navigateTo }) {
   };
 
   const formatDateTimeSQL = (date) => {
-    return date.toISOString().slice(0, 19).replace("T", " ");
+    const pad = (n) => String(n).padStart(2, "0");
+    return (
+      date.getFullYear() + "-" +
+      pad(date.getMonth() + 1) + "-" +
+      pad(date.getDate()) + " " +
+      pad(date.getHours()) + ":" +
+      pad(date.getMinutes()) + ":00"
+    );
   };
 
   const onChangeDateTime = (event, selectedDate) => {
@@ -128,19 +160,32 @@ export default function AdicionarEvento({ navigateTo }) {
           </TouchableOpacity>
 
           <Text style={{ paddingLeft: 15, ...styles.h2 }}>
-            Adicionar Evento
+            {editData ? "Editar Evento" : "Adicionar Evento"}
           </Text>
         </View>
 
         <View style={styles.container}>
-          <TouchableOpacity
-            style={styles.input}
-            onPress={() => setShowPicker(true)}
-          >
-            <Text style={{ color: dataHora ? "#000" : "#999" }}>
-              {dataHora ? formatDateTimeBR(dataHora) : "Selecione data e hora"}
-            </Text>
-          </TouchableOpacity>
+          <View>
+            <Text style={styles.h3}>Descrição</Text>
+            <TextInput
+              placeholder="Descrição"
+              value={descricao}
+              onChangeText={setDescricao}
+              style={styles.input}
+            />
+          </View>
+
+          <View>
+            <Text style={styles.h3}>Data</Text>
+            <TouchableOpacity
+              style={styles.input}
+              onPress={() => setShowPicker(true)}
+              >
+              <Text style={{ color: dataHora ? "#000" : "#999" }}>
+                {dataHora ? formatDateTimeBR(dataHora) : "Selecione data e hora"}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
           {showPicker && (
             <DateTimePicker
@@ -151,24 +196,44 @@ export default function AdicionarEvento({ navigateTo }) {
             />
           )}
 
-          <TextInput
-            placeholder="Descrição"
-            value={descricao}
-            onChangeText={setDescricao}
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Local"
-            value={local}
-            onChangeText={setLocal}
-            style={styles.input}
-          />
+          <View>
+            <Text style={styles.h3}>Local</Text>
+            <TextInput
+              placeholder="Local"
+              value={local}
+              onChangeText={setLocal}
+              onFocus={() => recentAddresses.length > 0 && setShowAddresses(true)}
+              onBlur={() => setTimeout(() => setShowAddresses(false), 150)}
+              style={styles.input}
+            />
+          </View>
+
+          {showAddresses && recentAddresses.length > 0 && (
+            <View style={styles.addressDropdown}>
+              {recentAddresses.slice(0, 5).map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.addressItem,
+                    index < Math.min(recentAddresses.length, 5) - 1 && styles.addressItemBorder,
+                  ]}
+                  onPress={() => {
+                    setLocal(item);
+                    setShowAddresses(false);
+                  }}
+                >
+                  <Text style={styles.addressItemIcon}>&#9906;</Text>
+                  <Text style={styles.addressItemText} numberOfLines={1}>{item}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
 
           <TouchableOpacity
-            onPress={handleCreateEvento}
+            onPress={handleSubmit}
             style={styles.submitButton}
           >
-            <Text style={styles.submitButtonText}>Criar Ensaio</Text>
+            <Text style={styles.submitButtonText}>{editData ? "Salvar Alterações" : "Criar Evento"}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -181,6 +246,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: "Poppins_700Bold",
     marginBottom: 15,
+  },
+  h3: {
+    fontSize: 14,
+    fontFamily: 'Nunito_500Medium',
+    fontWeight: "900",
+    marginBottom: 10,
+    color: '#000',    
   },
   titleContainer: {
     paddingVertical: 10,
@@ -257,5 +329,39 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: "#FFFFFF",
     fontFamily: "Poppins_700Bold",
+  },
+  addressDropdown: {
+    backgroundColor: "#FFF",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    marginTop: -10,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  addressItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+  },
+  addressItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
+  },
+  addressItemIcon: {
+    fontSize: 14,
+    color: "#FF4242",
+    marginRight: 12,
+  },
+  addressItemText: {
+    fontSize: 15,
+    fontFamily: "Nunito_500Medium",
+    color: "#333",
+    flex: 1,
   },
 });

@@ -86,11 +86,13 @@ function Page() {
   const [previousScreen, setPreviousScreen] = useState(null);
   const [selectedHino, setSelectedHino] = useState(null);
   const [selectedHinoGeral, setSelectedHinoGeral] = useState(null);
+  const [editData, setEditData] = useState(null);
 
-  const navigateTo = (screen, item = null, hinoGeral = null, previousScreenParam = null) => {
+  const navigateTo = (screen, item = null, hinoGeral = null, previousScreenParam = null, editDataParam = null) => {
     setSelectedHino(item);
     setSelectedHinoGeral(hinoGeral);
     setPreviousScreen(previousScreenParam || currentScreen);
+    setEditData(editDataParam);
     setCurrentScreen(screen);
   };
 
@@ -138,6 +140,7 @@ function Page() {
           selectedHino={selectedHino}
           previousScreen={previousScreen}
           selectedHinoGeral={selectedHinoGeral}
+          editData={editData}
           onLogin={handleLogin}
           onLogout={handleLogout}
         />

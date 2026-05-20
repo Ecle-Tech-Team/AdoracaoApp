@@ -23,6 +23,7 @@ import {
   Poppins_600SemiBold,
 } from "@expo-google-fonts/poppins";
 import { saveRecentlyViewed } from "../../src/services/recentlyViewed";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from "../../src/contexts/AuthContext";
 import {
   getUserPlaylists,
@@ -33,6 +34,7 @@ import {
 const FONT_STEP = 2;
 const FONT_MIN = 12;
 const FONT_MAX = 32;
+const FONT_SIZE_KEY = '@hino_font_size';
 
 const screenWidth = Dimensions.get("window").width;
 const getBaseFontSize = () => {
@@ -69,6 +71,31 @@ export default function HinoGeral({
   const [showCreateFromHino, setShowCreateFromHino] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const { user } = useContext(AuthContext);
+
+  useEffect(() => {
+    const loadFontSize = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(FONT_SIZE_KEY);
+        if (saved !== null) {
+          setFontSize(Number(saved));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar tamanho da fonte:', error);
+      }
+    };
+    loadFontSize();
+  }, []);
+
+  useEffect(() => {
+    const saveFontSize = async () => {
+      try {
+        await AsyncStorage.setItem(FONT_SIZE_KEY, String(fontSize));
+      } catch (error) {
+        console.error('Erro ao salvar tamanho da fonte:', error);
+      }
+    };
+    saveFontSize();
+  }, [fontSize]);
 
   useEffect(() => {
     if (selectedHino) {

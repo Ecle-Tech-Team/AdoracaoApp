@@ -10,7 +10,8 @@
       "Bash(npx expo-cli:*)",
       "WebSearch",
       "Bash(npm view:*)",
-      "Bash(sshpass:*)"
+      "Bash(sshpass:*)",
+      "WebFetch(domain:imgur.com)"
     ],
     "additionalDirectories": [
       "C:\\Users\\Administrador\\Documents\\code\\adoracao-api"

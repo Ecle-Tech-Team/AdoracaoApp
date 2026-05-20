@@ -168,6 +168,16 @@ export const removeEnsaio = async (id) => {
   return response.data;
 };
 
+export const updateEnsaio = async (id, data, descricao, local, hinoIds = []) => {
+  const response = await api.put(`/ensaios/${id}`, {
+    data,
+    descricao,
+    local,
+    hinoIds
+  });
+  return response.data;
+};
+
 /* =========================
   EVENTOS
 ========================= */
@@ -189,6 +199,16 @@ export const createEvento = async (id_grupo, data, descricao, local, hinoIds = [
 
 export const removeEvento = async (id) => {
   const response = await api.delete(`/eventos/${id}`);
+  return response.data;
+};
+
+export const updateEvento = async (id, data, descricao, local, hinoIds = []) => {
+  const response = await api.put(`/eventos/${id}`, {
+    data,
+    descricao,
+    local,
+    hinoIds
+  });
   return response.data;
 };
 
