@@ -52,57 +52,62 @@ export default function HinarioComp({ navigateTo }) {
     return null;
   };
 
-
   return (
-    <View>
-      <View>
-        <View style={styles.titleContainer}>
-          <TouchableOpacity onPress={() => navigateTo('GrupoComp')}>
-            <Text style={styles.backButton}>&#60;</Text>
-          </TouchableOpacity>
+    <View style={styles.container}>
+      <View style={styles.titleContainer}>
+        <TouchableOpacity onPress={() => navigateTo('GrupoComp')}>
+          <Text style={styles.backButton}>&#60;</Text>
+        </TouchableOpacity>
 
-          <Text style={{paddingLeft: 15, ...styles.h2}}>Hinário</Text>
-        </View>
+        <Text style={{paddingLeft: 15, ...styles.h2}}>Hinário</Text>
+      </View>
 
-        <View>
-          <TextInput
-            style={styles.searchBar}
-            placeholder="&#x1F50D; Buscar hino..."
-            value={searchText}
-            onChangeText={text => setSearchText(text)}
-          />
-          {filteredHinos.length > 0 ? (
-            filteredHinos.map((hino) => (
+      <TextInput
+        style={styles.searchBar}
+        placeholder="&#x1F50D; Buscar hino..."
+        value={searchText}
+        onChangeText={text => setSearchText(text)}
+      />
+
+      <View style={styles.listContainer}>
+        {filteredHinos.length > 0 ? (
+          filteredHinos.map((hino) => (
+            <View key={hino.numero || hino._id} style={styles.hinoItemWrapper}>
               <TouchableOpacity
-                key={hino.numero}
-                style={styles.lista}
-                data={filteredHinos}
+                style={styles.hinoItem}
                 onPress={() => navigateTo('HinarioGrupo', hino)}
+                activeOpacity={0.7}
               >
-                <View style={styles.hinoContent}>
-                  <Text style={styles.item}>{hino.titulo} - {hino.autor}</Text>
-                  {hino.tag ? (
-                    <View style={styles.tagBadge}>
-                      <Text style={styles.tagBadgeText}>{hino.tag}</Text>
-                    </View>
-                  ) : null}
+                <View style={styles.hinoTextContainer}>
+                  <Text style={styles.hinoTitle}>{hino.titulo}</Text>
+                  <View style={styles.hinoMetaRow}>
+                    <Text style={styles.hinoAutor}>{hino.autor}</Text>
+                    {hino.tag ? (
+                      <View style={styles.tagBadge}>
+                        <Text style={styles.tagBadgeText}>{hino.tag}</Text>
+                      </View>
+                    ) : null}
+                  </View>
                 </View>
               </TouchableOpacity>
-            ))
-          ) : (
-            <Text style={styles.emptyText}>Nenhum hino encontrado.</Text>
-          )}
-        </View>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>Nenhum hino encontrado.</Text>
+        )}
       </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   h2: {
     fontSize: 24,
     fontFamily: 'Poppins_700Bold',
-    marginBottom: 15
+    flex: 1,
   },
   searchBar: {
     padding: 18,
@@ -110,64 +115,66 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#FFCB69',
     fontFamily: 'Poppins_600SemiBold',
-    marginHorizontal: 5,
+    marginHorizontal: 10,
     marginBottom: 12,
     borderRadius: 12,
     color: '#BA9D36'
   },
-  container: {
-    flex: 1,
-    paddingTop: 20,
+  listContainer: {
+    paddingHorizontal: 10,
   },
-  hinoContent: {
-    flex: 1,
-    flexDirection: 'column',
+  hinoItemWrapper: {
+    marginBottom: 12,
+    position: 'relative',
   },
-  item: {
+  hinoItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 18,
-    paddingBottom: 8,
-    marginHorizontal: 5,
-    marginBottom: 0,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    borderRadius: 10,
     backgroundColor: '#FFFAE1',
+  },
+  hinoTextContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  hinoTitle: {
     fontFamily: 'Poppins_600SemiBold',
     color: '#BA9D36',
+    fontSize: 16,
+  },
+  hinoMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  hinoAutor: {
+    fontFamily: 'Nunito_500Medium',
+    color: '#A68B2E',
+    fontSize: 13,
   },
   tagBadge: {
     backgroundColor: '#FFCB69',
-    alignSelf: 'flex-end',
-    paddingHorizontal: 14,
-    paddingVertical: 4,
-    borderTopLeftRadius: 8,
-    borderBottomRightRadius: 10,
-    marginTop: -4,
-    marginRight: 5,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    marginLeft: 8,
   },
   tagBadgeText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Poppins_600SemiBold',
-  },
-  title: {
-    fontSize: 18,
   },
   titleContainer: {
     paddingVertical: 10,
-    paddingLeft: 10,
-    display: 'flex',
-    flexDirection: 'row'
-  },
-  lista: {
-    display: 'flex',
+    paddingHorizontal: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 4,
   },
   backButton: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#ffffff',
     backgroundColor: '#FFCB69',
     paddingTop: 3,
     paddingBottom: 5,

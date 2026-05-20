@@ -134,10 +134,11 @@ export default function DashboardGrupo({ navigateTo }) {
   };
 
   const handleAtividadePress = (item) => {
+    const isComponente = user?.userType === 'Componente';
     if (item.tipo === 'evento') {
-      navigateTo('EventosReg');
+      navigateTo(isComponente ? 'EventosComp' : 'EventosReg');
     } else {
-      navigateTo('EnsaiosReg');
+      navigateTo(isComponente ? 'EnsaiosComp' : 'EnsaiosReg');
     }
   };
 
@@ -291,7 +292,7 @@ export default function DashboardGrupo({ navigateTo }) {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Próximas Atividades</Text>
-          <TouchableOpacity onPress={() => navigateTo('GrupoReg')}>
+          <TouchableOpacity onPress={() => navigateTo(user?.userType === 'Componente' ? 'GrupoComp' : 'GrupoReg')}>
             <Text style={styles.seeAllText}>Ver todas</Text>
           </TouchableOpacity>
         </View>
@@ -317,7 +318,7 @@ export default function DashboardGrupo({ navigateTo }) {
                     />
                   ))}
                   {remaining > 0 && (
-                    <TouchableOpacity onPress={() => navigateTo('GrupoReg')}>
+                    <TouchableOpacity onPress={() => navigateTo(user?.userType === 'Componente' ? 'GrupoComp' : 'GrupoReg')}>
                       <Text style={styles.maisAtividadesText}>
                         +{remaining} {remaining === 1 ? 'atividade' : 'atividades'} nessa semana
                       </Text>
