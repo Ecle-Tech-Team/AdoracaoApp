@@ -2,6 +2,7 @@ import { StyleSheet, Text, View, Image, TouchableOpacity, ActivityIndicator } fr
 import React, { useContext, useEffect, useState } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
+import Feather from '@expo/vector-icons/Feather';
 import { AuthContext } from '../../src/contexts/AuthContext';
 import { fetchGrupo } from '../../src/api/api';
 
@@ -44,7 +45,14 @@ export default function GrupoComp({ navigateTo }) {
         <View>
           {/* Cabeçalho com nome do grupo */}
           <View style={styles.headerContainer}>
-            <Text style={{paddingLeft: 15, ...styles.h2}}>Grupo</Text>
+            <View style={styles.titleContainer}>
+              <Text style={styles.h2}>Grupo</Text>
+              <TouchableOpacity onPress={() => navigateTo('Calendario')}>
+                <View style={styles.backButton}>
+                  <Feather name="calendar" size={24} color="#fff" />
+                </View>
+              </TouchableOpacity>
+            </View>
             {loadingGrupo ? (
               <ActivityIndicator size="small" color="#FFCB69" style={{ marginLeft: 15 }} />
             ) : grupoNome ? (
@@ -78,7 +86,7 @@ export default function GrupoComp({ navigateTo }) {
                 <Text style={{...styles.cardTitle, color: "#FF8282"}}>Eventos</Text>
                 <Text style={{...styles.cardTxt, color: "#E39393"}}>Veja todos os eventos locais e externos {'\n'}que serão realizados.</Text>
               </View>
-            </TouchableOpacity>
+            </TouchableOpacity>            
           </View>
         </View>
       </View>
@@ -95,6 +103,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Nunito_500Medium',
     color: '#BFBFBF',
+  },
+  titleContainer: {
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  backButton: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    backgroundColor: '#FFCB69',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 5,
   },
   txt: {
     fontSize: 14,
