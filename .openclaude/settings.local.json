@@ -14,7 +14,8 @@
       "WebFetch(domain:imgur.com)"
     ],
     "additionalDirectories": [
-      "C:\\Users\\Administrador\\Documents\\code\\adoracao-api"
+      "C:\\Users\\Administrador\\Documents\\code\\adoracao-api",
+      "C:\\Users\\Administrador\\Documents\\code\\AdoracaoApp-WebApp"
     ]
   }
 }

@@ -3,11 +3,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { AuthProvider, AuthContext } from '../src/contexts/AuthContext';
+import { OnboardingProvider, OnboardingContext } from '../src/contexts/OnboardingContext';
 import { HinarioProvider } from "../src/contexts/HinarioContext";
 import { SectionProvider } from "../src/contexts/SectionContext";
 import { registerForPushNotifications, setupNotificationListener } from '../src/services/notificationService';
 import Login from './screens/login';
 import Cadastro from './screens/cadastro';
+import OnboardingScreen from './onboarding/OnboardingScreen';
 import Dashboard from './screens/dashboard';
 import DashboardCantor from './screens/dashboardCantor';
 import DashboardGrupo from './screens/dashboardGrupo';
@@ -83,6 +85,7 @@ const userScreens = {
 
 function Page() {
   const { user } = useContext(AuthContext);
+  const { onboardingComplete } = useContext(OnboardingContext);
   const [currentScreen, setCurrentScreen] = useState('Dashboard');
   const [previousScreen, setPreviousScreen] = useState(null);
   const [selectedHino, setSelectedHino] = useState(null);
@@ -107,6 +110,14 @@ function Page() {
     }
   };
 
+  const goToLogin = async (screen) => {
+    setCurrentScreen(screen || 'Login');
+  };
+
+  const goToOnboarding = async () => {
+    setCurrentScreen('Onboarding');
+  };
+
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('userToken');
@@ -123,6 +134,16 @@ function Page() {
   let ScreenComponent;
 
   if (!user) {
+    if (onboardingComplete === null) {
+      // Still loading
+      return <View style={styles.container} />;
+    }
+    if (!onboardingComplete) {
+      return <OnboardingScreen navigateTo={goToLogin} />;
+    }
+    if (currentScreen === 'Onboarding') {
+      return <OnboardingScreen navigateTo={goToLogin} />;
+    }
     ScreenComponent = currentScreen === "Cadastro" ? Cadastro : Login;
   } else if (currentScreen === 'Dashboard') {
     ScreenComponent = DashboardComponent;
@@ -183,11 +204,13 @@ function AppWrapper() {
 export default function App() {
   return (
     <AuthProvider>
-      <HinarioProvider>
-        <SectionProvider>
-          <AppWrapper />
-        </SectionProvider>
-      </HinarioProvider>
+      <OnboardingProvider>
+        <HinarioProvider>
+          <SectionProvider>
+            <AppWrapper />
+          </SectionProvider>
+        </HinarioProvider>
+      </OnboardingProvider>
     </AuthProvider>
   );
 }

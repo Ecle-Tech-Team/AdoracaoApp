@@ -362,3 +362,15 @@ export const getPlaylistHinos = async (userId, playlistId) => {
   const response = await api.get(`/playlists/${userId}/${playlistId}`);
   return response.data;
 };
+
+export const getAllGrupos = async () => {
+  const response = await api.get('/grupo');
+  return response.data;
+};
+
+export const createGrupo = async (name, local, typeGroup, regenteId) => {
+  const response = await api.post('/grupo', { name, local, typeGroup, regenteId });
+  return response.data;
+};
+
+export default api;
