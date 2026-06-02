@@ -5,35 +5,46 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFonts, Nunito_500Medium, Nunito_400Regular } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
-
-const GRUPOS_SUGESTAO = [
-  'Grupo de Louvor Jovem',
-  'Ministério de Louvor',
-  'Grupo de Adoração',
-  'Coral da Igreja',
-  'Bandinha',
-  'Ministério de Música',
-  'Grupo de Jovens',
-];
+import { getAllGrupos } from '../../src/api/api';
 
 export default function GrupoRegente({ value, onChange, onCreateGroup, onNext, onBack }) {
   const [search, setSearch] = useState('');
+  const [grupos, setGrupos] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [fontLoaded] = useFonts({
     Nunito_500Medium,
     Nunito_400Regular,
     Poppins_700Bold,
   });
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getAllGrupos();
+        setGrupos(data);
+      } catch (err) {
+        console.log('Erro ao carregar grupos:', err);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
   if (!fontLoaded) return null;
 
-  const filtered = GRUPOS_SUGESTAO.filter((g) =>
-    g.toLowerCase().includes(search.toLowerCase())
+  const filtered = grupos.filter((g) =>
+    g.nome.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleSelect = (grupo) => {
+    onChange(grupo.id, grupo.nome);
+  };
 
   return (
     <View style={styles.container}>
@@ -58,37 +69,47 @@ export default function GrupoRegente({ value, onChange, onCreateGroup, onNext, o
           />
         </View>
 
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item}
-          style={styles.list}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.listItem,
-                value === item && styles.listItemSelected,
-              ]}
-              onPress={() => onChange(item)}
-            >
-              <Feather name="users"
-                color={value === item ? '#FFCB69' : '#999'}
-                size={20}
-              />
-              <Text
+        {loading ? (
+          <ActivityIndicator color="#FFCB69" size="large" style={{ marginTop: 40 }} />
+        ) : (
+          <FlatList
+            data={filtered}
+            keyExtractor={(item) => String(item.id)}
+            style={styles.list}
+            showsVerticalScrollIndicator={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity
                 style={[
-                  styles.listItemText,
-                  value === item && styles.listItemTextSelected,
+                  styles.listItem,
+                  value === item.id && styles.listItemSelected,
                 ]}
+                onPress={() => handleSelect(item)}
               >
-                {item}
-              </Text>
-              {value === item && (
-                <Text style={styles.checkIcon}>✓</Text>
-              )}
-            </TouchableOpacity>
-          )}
-        />
+                <Feather name="users"
+                  color={value === item.id ? '#FFCB69' : '#999'}
+                  size={20}
+                />
+                <View style={styles.listItemInfo}>
+                  <Text
+                    style={[
+                      styles.listItemText,
+                      value === item.id && styles.listItemTextSelected,
+                    ]}
+                  >
+                    {item.nome}
+                  </Text>
+                  <Text style={styles.listItemLocal}>{item.local}</Text>
+                </View>
+                {value === item.id && (
+                  <Text style={styles.checkIcon}>✓</Text>
+                )}
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>Nenhum grupo encontrado</Text>
+            }
+          />
+        )}
 
         <TouchableOpacity style={styles.createButton} onPress={onCreateGroup}>
           <Feather name="plus" color="#FFCB69" size={20} />
@@ -166,11 +187,19 @@ const styles = StyleSheet.create({
   listItemSelected: {
     backgroundColor: '#FFFAE8',
   },
+  listItemInfo: {
+    flex: 1,
+  },
   listItemText: {
     fontFamily: 'Nunito_400Regular',
     fontSize: 14,
     color: '#333',
-    flex: 1,
+  },
+  listItemLocal: {
+    fontFamily: 'Nunito_400Regular',
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
   },
   listItemTextSelected: {
     color: '#FFCB69',
@@ -191,6 +220,13 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#eee',
   },
+  emptyText: {
+    fontFamily: 'Nunito_400Regular',
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 24,
+  },
   createButtonText: {
     fontFamily: 'Nunito_500Medium',
     fontSize: 14,
@@ -208,7 +244,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonDisabled: {
-    backgroundColor: '#f0d0d0',
+    backgroundColor: '#f0ebd0',
   },
   buttonText: {
     fontFamily: 'Poppins_700Bold',
@@ -216,6 +252,6 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   buttonTextDisabled: {
-    color: '#d4a0a0',
+    color: '#d4cca0',
   },
 });

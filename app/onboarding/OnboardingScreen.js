@@ -4,7 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { useOnboarding } from '../../src/contexts/OnboardingContext';
 import { AuthContext } from '../../src/contexts/AuthContext';
 import { HinarioContext } from '../../src/contexts/HinarioContext';
-import { registerUser, userLogin, createGrupo, getAllGrupos } from '../../src/api/api';
+import api, { registerUser, userLogin, createGrupo, getAllGrupos, checkEmailExists, listarIgrejas } from '../../src/api/api';
 import Welcome from './Welcome';
 import CadastroNome from './CadastroNome';
 import CadastroEmail from './CadastroEmail';
@@ -51,7 +51,20 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
   const { trocarHinario } = useContext(HinarioContext);
   const [step, setStep] = useState(STEPS.WELCOME);
   const [emailError, setEmailError] = useState('');
+  const [igrejas, setIgrejas] = useState([]);
+  const [isReviewing, setIsReviewing] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const data = await listarIgrejas();
+        setIgrejas(data);
+      } catch (err) {
+        console.log('Erro ao carregar igrejas:', err);
+      }
+    })();
+  }, []);
 
   const animateTo = useCallback(
     (nextStep) => {
@@ -67,7 +80,23 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
     [step, slideAnim]
   );
 
-  const goNext = (nextStep) => animateTo(nextStep);
+  const goNext = (nextStep) => {
+    // Se está em modo revisão e não está indo para REVISAR ou PRONTO,
+    // redireciona de volta ao REVISAR.
+    // Exceto para steps de grupo, que precisam ser percorridos em sequência
+    // antes de voltar ao REVISAR.
+    if (
+      isReviewing &&
+      nextStep !== STEPS.REVISAR &&
+      nextStep !== STEPS.PRONTO &&
+      step !== STEPS.REVISAR &&
+      ![STEPS.VERIFICACAO, STEPS.VERIFICADO, STEPS.TIPO_USUARIO, STEPS.GRUPO_COMPONENTE, STEPS.GRUPO_REGENTE, STEPS.CRIAR_GRUPO].includes(nextStep)
+    ) {
+      animateTo(STEPS.REVISAR);
+      return;
+    }
+    animateTo(nextStep);
+  };
   const goBack = (prevStep) => animateTo(prevStep);
 
   // Step handlers
@@ -75,12 +104,22 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
 
   const handleNomeNext = () => goNext(STEPS.EMAIL);
 
-  const handleEmailNext = () => {
-    // Basic email validation
+  const handleEmailNext = async () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
       setEmailError('Por favor, insira um e-mail válido.');
       return;
     }
+
+    try {
+      const result = await checkEmailExists(data.email);
+      if (result.exists) {
+        setEmailError('Este email já está cadastrado no sistema.');
+        return;
+      }
+    } catch (err) {
+      console.log('Erro ao verificar email:', err);
+    }
+
     setEmailError('');
     goNext(STEPS.VERIFICACAO);
   };
@@ -135,8 +174,7 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
   };
 
   const handleCreateGroup = () => goNext(STEPS.CRIAR_GRUPO);
-  const handleCriarGrupoNext = (grupoData) => {
-    updateData({ nomeGrupo: grupoData.nome, localGrupo: grupoData.local, tipoGrupo: grupoData.tipo });
+  const handleCriarGrupoNext = () => {
     goNext(STEPS.NOTIFICACOES);
   };
 
@@ -197,7 +235,7 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
       }
 
       // Se é regente com dados de criação de grupo, cria o grupo via API
-      if (userTypeCapitalized === 'Regente' && data.nomeGrupo && data.localGrupo && data.tipoGrupo) {
+      if (userTypeCapitalized === 'Regente' && data.nomeGrupo && (data.localGrupo || data.igrejaGrupo) && data.tipoGrupo) {
         try {
           // O regenteId será preenchido após o login automático (handleFinish),
           // então guardamos os dados para criar depois
@@ -222,15 +260,28 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
       // Faz login automático via API
       const loginResponse = await userLogin({ email: data.email, password: data.password });
       const { token, id_user, userType, id_grupo } = loginResponse;
-      await login({ token, id_user, userType, id_grupo });
+      let grupoId = id_grupo;
 
       // Se tem grupo pendente pra criar (regente), cria agora com o id_user
       if (data.pendenteCriarGrupo) {
         try {
           const tipoGrupo = data.tipoGrupo === 'Louvor' ? 'Louvor' : 'Musical';
-          await createGrupo(data.nomeGrupo, data.localGrupo, tipoGrupo, id_user);
+          const local = data.localGrupo || data.igrejaGrupo || '';
+          const grupoCriado = await createGrupo(data.nomeGrupo, local, tipoGrupo, id_user);
+          grupoId = grupoCriado?.grupoId || grupoCriado?.id_grupo || grupoCriado?.id || null;
         } catch (groupErr) {
           console.log('Erro ao criar grupo após login:', groupErr);
+        }
+      }
+
+      await login({ token, id_user, userType, id_grupo: grupoId });
+
+      // Se um grupo foi criado/capturado após o login, atualiza o id_grupo no backend
+      if (grupoId && !id_grupo) {
+        try {
+          await api.put(`/user/${id_user}/grupo`, { id_grupo: grupoId });
+        } catch (updateErr) {
+          console.log('Erro ao vincular usuário ao grupo:', updateErr);
         }
       }
 
@@ -261,7 +312,7 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
             value={data.email}
             error={emailError}
             onChange={(v) => {
-              updateData({ email: v });
+              updateData({ email: v, emailVerificado: false });
               setEmailError('');
             }}
             onNext={handleEmailNext}
@@ -346,8 +397,8 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
       case STEPS.GRUPO_REGENTE:
         return (
           <GrupoRegente
-            value={data.grupo}
-            onChange={(v) => updateData({ grupo: v })}
+            value={data.grupoId}
+            onChange={(id, nome) => updateData({ grupoId: id, grupo: nome })}
             onCreateGroup={handleCreateGroup}
             onNext={handleGrupoRegenteNext}
             onBack={() => goBack(STEPS.TIPO_USUARIO)}
@@ -357,6 +408,7 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
         return (
           <CriarGrupo
             data={data}
+            igrejas={igrejas}
             onChange={updateData}
             onNext={handleCriarGrupoNext}
             onBack={() => goBack(STEPS.GRUPO_REGENTE)}
@@ -379,11 +431,34 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
           />
         );
       case STEPS.REVISAR:
+        // Ativa modo revisão ao chegar na tela de revisão
+        if (!isReviewing) setIsReviewing(true);
         return (
           <Revisar
             data={data}
             onConfirm={handleConfirm}
-            onBack={() => goBack(STEPS.NOTIFICACOES)}
+            onBack={() => {
+              setIsReviewing(false);
+              goBack(STEPS.NOTIFICACOES);
+            }}
+            onEditNome={() => goBack(STEPS.NOME)}
+            onEditEmail={() => goBack(STEPS.EMAIL)}
+            onEditSenha={() => goBack(STEPS.SENHA)}
+            onEditDataNasc={() => goBack(STEPS.DATA_NASC)}
+            onEditHinario={() => goBack(STEPS.HINARIO)}
+            onEditIgreja={() => goBack(STEPS.IGREJA)}
+            onEditTipoUsuario={() => goBack(STEPS.TIPO_USUARIO)}
+            onEditGrupo={() => {
+              if (data.userType === 'regente') {
+                if (data.nomeGrupo) {
+                  goBack(STEPS.CRIAR_GRUPO);
+                } else {
+                  goBack(STEPS.GRUPO_REGENTE);
+                }
+              } else {
+                goBack(STEPS.GRUPO_COMPONENTE);
+              }
+            }}
           />
         );
       case STEPS.PRONTO:

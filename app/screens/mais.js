@@ -3,9 +3,11 @@ import React, { useContext, useEffect } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
 import { AuthContext } from '../../src/contexts/AuthContext';
+import { useOnboarding } from '../../src/contexts/OnboardingContext';
 
 export default function Mais({ navigateTo, routeParams }) {
   const { logout, id_grupo } = useContext(AuthContext);
+  const { resetOnboarding } = useOnboarding();
   const [fontLoaded] = useFonts({
     Nunito_500Medium,
     Poppins_700Bold, Poppins_600SemiBold
@@ -51,7 +53,7 @@ export default function Mais({ navigateTo, routeParams }) {
               <Text style={styles.txt}>Mudar Hinário</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={logout} style={styles.item} activeOpacity={0.7}>
+            <TouchableOpacity onPress={() => { logout(); resetOnboarding(); }} style={styles.item} activeOpacity={0.7}>
               <Text style={styles.txt}>Encerrar Sessão</Text>
             </TouchableOpacity>
           </View>

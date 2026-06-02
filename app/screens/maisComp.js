@@ -4,11 +4,13 @@ import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
 import { fetchComponentes, removeComponentFromGrupo } from '../../src/api/api';
 import { AuthContext } from '../../src/contexts/AuthContext';
+import { useOnboarding } from '../../src/contexts/OnboardingContext';
 
-export default function MaisComp({ navigateTo }) {  
+export default function MaisComp({ navigateTo }) {
   const [componentes, setComponentes] = useState([]);
   const [idUser, setidUser] = useState(null);
   const { id_grupo, user, logout } = useContext(AuthContext);
+  const { resetOnboarding } = useOnboarding();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,7 +78,7 @@ export default function MaisComp({ navigateTo }) {
               <Text style={styles.itemText}>Mudar Hinário</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={logout} style={styles.item} activeOpacity={0.7}>
+            <TouchableOpacity onPress={() => { logout(); resetOnboarding(); }} style={styles.item} activeOpacity={0.7}>
               <Text style={styles.itemText}>Encerrar Sessão</Text>
             </TouchableOpacity>
           </View>

@@ -138,7 +138,8 @@ function Page() {
       // Still loading
       return <View style={styles.container} />;
     }
-    if (!onboardingComplete) {
+    // Primeiro acesso: nunca completou onboarding
+    if (!onboardingComplete && currentScreen !== 'Login' && currentScreen !== 'Cadastro') {
       return <OnboardingScreen navigateTo={goToLogin} />;
     }
     if (currentScreen === 'Onboarding') {

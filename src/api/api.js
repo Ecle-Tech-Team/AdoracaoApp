@@ -373,4 +373,14 @@ export const createGrupo = async (name, local, typeGroup, regenteId) => {
   return response.data;
 };
 
+export const checkEmailExists = async (email) => {
+  const response = await api.get(`/user/check-email/${encodeURIComponent(email)}`);
+  return response.data;
+};
+
+export const listarIgrejas = async () => {
+  const response = await api.get('/user/igrejas');
+  return response.data;
+};
+
 export default api;
