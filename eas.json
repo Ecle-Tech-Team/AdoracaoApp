@@ -7,19 +7,22 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://adoracao-api-production.up.railway.app"
+        "EXPO_PUBLIC_API_URL": "https://api.adoracaoapp.com.br"
       }
     },
     "preview": {
       "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://adoracao-api-production.up.railway.app"
+        "EXPO_PUBLIC_API_URL": "https://api.adoracaoapp.com.br"
       }
     },
     "production": {
       "distribution": "store",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://adoracao-api-production.up.railway.app"
+        "EXPO_PUBLIC_API_URL": "https://api.adoracaoapp.com.br"
       }
     }
   },
