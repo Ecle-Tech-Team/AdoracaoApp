@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Image, TextInput, FlatList, TouchableOpacity, A
 import React, { useState, useEffect, useContext } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchComponentes } from '../../src/api/api';
+import { fetchComponentes, api } from '../../src/api/api';
 import { AuthContext } from '../../src/contexts/AuthContext';
 import Feather from '@expo/vector-icons/Feather';
 
@@ -28,22 +28,12 @@ export default function Componentes({ navigateTo }) {
 
   const handleRemove = async (id_usuario) => {
     try {
-      const response = await fetch(`https://api.adoracaoapp.com.br/user/removeComponente/${id_usuario}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          tipo_usuario: 'Adorador',
-          id_grupo: null,
-        }),
+      await api.put(`/user/removeComponente/${id_usuario}`, {
+        tipo_usuario: 'Adorador',
+        id_grupo: null,
       });
 
-      if (response.ok) {
-        setComponentes(prevState => prevState.filter(comp => comp.id_usuario !== id_usuario));
-      } else {
-        console.error('Erro ao remover componente');
-      }
+      setComponentes(prevState => prevState.filter(comp => comp.id_usuario !== id_usuario));
     } catch (error) {
       console.error('Erro ao remover componente:', error);
     }

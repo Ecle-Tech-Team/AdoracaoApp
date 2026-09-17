@@ -2,9 +2,8 @@ import { StyleSheet, Text, View, TextInput, TouchableOpacity, Alert, FlatList } 
 import React, { useState, useEffect, useContext } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchHinosGeral, fetchHinarioGrupo } from '../../src/api/api';
+import { fetchHinosGeral, fetchHinarioGrupo, api } from '../../src/api/api';
 import { AuthContext } from '../../src/contexts/AuthContext';
-import axios from 'axios';
 
 const TAGS = ['Ceia', 'Missões', 'Família', 'Batismo', 'Natal', 'Páscoa'];
 
@@ -44,7 +43,7 @@ export default function AdicionarHino({ navigateTo }) {
 
     const addHinoToGrupo = async (id_grupo, hinoId, tag) => {
       try {
-        const response = await axios.post(`https://api.adoracaoapp.com.br/grupo/${id_grupo}/hinos`, { hinoId, tag });
+        const response = await api.post(`/grupo/${id_grupo}/hinos`, { hinoId, tag });
         return response.data;
       } catch (error) {
         console.error('Erro ao adicionar hino ao grupo:', error);

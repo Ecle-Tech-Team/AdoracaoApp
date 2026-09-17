@@ -2,9 +2,8 @@ import { StyleSheet, Text, View, TextInput, FlatList, TouchableOpacity, Alert } 
 import React, { useState, useEffect, useContext } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchUsuariosParaComponentes } from '../../src/api/api';
+import { fetchUsuariosParaComponentes, api } from '../../src/api/api';
 import { AuthContext } from '../../src/contexts/AuthContext';
-import axios from 'axios';
 
 export default function AdicionarComp({ navigateTo }) {
   const { id_grupo } = useContext(AuthContext);
@@ -27,7 +26,7 @@ export default function AdicionarComp({ navigateTo }) {
 
   const adicionarComponenteAoGrupo = async (idUser, id_grupo) => {
     try {
-      const response = await axios.post(`https://api.adoracaoapp.com.br/user/addComponente/${idUser}/${id_grupo}`);
+      const response = await api.post(`/user/addComponente/${idUser}/${id_grupo}`);
       return response.data;
     } catch (error) {
       console.error('Erro ao adicionar componente ao grupo:', error);

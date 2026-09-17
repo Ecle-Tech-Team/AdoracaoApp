@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+// Usa EXPO_PUBLIC_API_URL quando definida (eas.json / .env).
+// O fallback é o backend local acessível via Tailscale (dev PC + celular na mesma tailnet).
 const api = axios.create({
-  baseURL: 'https://api.adoracaoapp.com.br',
+  baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3333',
   timeout: 10000
 });
 
@@ -15,22 +17,8 @@ export const registerUser = async (userData) => {
 };
 
 export const userLogin = async (loginUser) => {
-
-  try {
-    const response = await axios.post(
-      'https://api.adoracaoapp.com.br/login', 
-      loginUser,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );    
-    return response.data; 
-  } catch (error) {
-    throw error;
-  }
-
+  const response = await api.post('/login', loginUser);
+  return response.data;
 };
 
 /* =========================
@@ -311,6 +299,7 @@ export const registerPushToken = async (token, id_user = null) => {
     // Sempre enviar id_user, mesmo se for null
     data.id_user = id_user;
 
+    // O backend exige id_user (400 se null). No login o id chega dentro de "usuario".
     const response = await api.post('/push-token', data);
     return response.data;
   } catch (error) {
@@ -383,4 +372,5 @@ export const listarIgrejas = async () => {
   return response.data;
 };
 
+export { api };
 export default api;

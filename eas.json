@@ -7,7 +7,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.adoracaoapp.com.br"
+        "EXPO_PUBLIC_API_URL": "http://localhost:3333"
       }
     },
     "preview": {
@@ -16,13 +16,13 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.adoracaoapp.com.br"
+        "EXPO_PUBLIC_API_URL": "http://localhost:3333"
       }
     },
     "production": {
       "distribution": "store",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.adoracaoapp.com.br"
+        "EXPO_PUBLIC_API_URL": "http://localhost:3333"
       }
     }
   },

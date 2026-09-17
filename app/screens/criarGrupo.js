@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, TextInput, Alert } from 'reac
 import React, { useState, useContext } from 'react';
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold } from '@expo-google-fonts/poppins';
-import axios from 'axios';
+import { api } from '../../src/api/api';
 import { AuthContext } from '../../src/contexts/AuthContext';
 
 export default function CriarGrupo({ navigateTo}) {
@@ -25,7 +25,7 @@ export default function CriarGrupo({ navigateTo}) {
   
     const handleCreateGroup = async () => {
       try {
-        const response = await axios.post('https://api.adoracaoapp.com.br/grupo', {
+        const response = await api.post('/grupo', {
           name: groupName,
           local: groupLocal,
           typeGroup: 'Louvor',

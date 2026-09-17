@@ -11,7 +11,20 @@
       "WebSearch",
       "Bash(npm view:*)",
       "Bash(sshpass:*)",
-      "WebFetch(domain:imgur.com)"
+      "WebFetch(domain:imgur.com)",
+      "Bash(curl -s -o /dev/null -w \"root:%{http_code}\\\\n\" --max-time 10 https://api.adoracaoapp.com.br/)",
+      "Bash(curl -s -o /dev/null -w \"push-token:%{http_code}\\\\n\" --max-time 10 -X POST https://api.adoracaoapp.com.br/push-token -H \"Content-Type: application/json\" -d '{\"\"token\"\":\"\"test\"\",\"\"id_user\"\":null}')",
+      "Bash(curl -s -o /dev/null -w \"lan-push-token:%{http_code}\\\\n\" --max-time 8 -X POST http://10.98.60.11:3333/push-token -H \"Content-Type: application/json\" -d '{\"\"token\"\":\"\"test\"\",\"\"id_user\"\":null}')",
+      "Bash(curl -s -o /dev/null -w \"lan-hinos:%{http_code}\\\\n\" --max-time 8 http://10.98.60.11:3333/hinos/harpa)",
+      "Bash(powershell.exe -NoProfile -Command \"Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_IPAddress -notlike ''''127.*'''' -and $_IPAddress -notlike ''''169.254.*'''' } | Select-Object InterfaceAlias,IPAddress,PrefixLength | Sort-Object InterfaceAlias | Format-Table -AutoSize | Out-String -Width 200\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(netstat -ano)",
+      "Bash(powershell -NoProfile -Command \"Get-Process -Id \\(Get-NetTCPConnection -LocalPort 3333 -State Listen | Select-Object -First 1 -ExpandProperty OwningProcess\\) | Select-Object Id,ProcessName,Path | Format-List\")",
+      "Bash(curl -s -m 5 -o /dev/null -w \"127.0.0.1 -> %{http_code}\\\\n\" http://127.0.0.1:3333/igrejas)",
+      "Bash(curl -s -m 5 -o /dev/null -w \"10.98.60.11 -> %{http_code}\\\\n\" http://10.98.60.11:3333/igrejas)",
+      "Bash(curl -s -m 5 -o /dev/null -w \"localhost -> %{http_code}\\\\n\" http://localhost:3333/igrejas)",
+      "Bash(curl -s -m 8 -o /dev/null -w \"tailscale IP API -> %{http_code}\\\\n\" http://100.75.173.84:3333/igrejas)",
+      "Bash(curl -s -m 8 http://100.75.173.84:3333/igrejas)"
     ],
     "additionalDirectories": [
       "C:\\Users\\Administrador\\Documents\\code\\adoracao-api",

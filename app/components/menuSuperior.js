@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFF',
         paddingHorizontal: 16,
         paddingVertical: 12,
+        marginTop: 20,
     },
     main:{
         flexDirection: 'row',
