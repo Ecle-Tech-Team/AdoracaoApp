@@ -75,7 +75,7 @@ export default function Revisar({
     {
       label: 'Igreja',
       value: data.igreja,
-      icon: 'crosshair',
+      icon: data.igreja === 'Não tenho igreja vinculada' ? 'slash' : 'crosshair',
       onEdit: onEditIgreja,
     },
     {

@@ -35,8 +35,8 @@ const STEPS = {
   DATA_NASC: 6,
   TERMOS: 7,
   HINARIO: 8,
-  IGREJA: 9,
-  TIPO_USUARIO: 10,
+  TIPO_USUARIO: 9,
+  IGREJA: 10,
   GRUPO_COMPONENTE: 11,
   GRUPO_REGENTE: 12,
   CRIAR_GRUPO: 13,
@@ -90,7 +90,7 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
       nextStep !== STEPS.REVISAR &&
       nextStep !== STEPS.PRONTO &&
       step !== STEPS.REVISAR &&
-      ![STEPS.VERIFICACAO, STEPS.VERIFICADO, STEPS.TIPO_USUARIO, STEPS.GRUPO_COMPONENTE, STEPS.GRUPO_REGENTE, STEPS.CRIAR_GRUPO].includes(nextStep)
+      ![STEPS.VERIFICACAO, STEPS.VERIFICADO, STEPS.IGREJA, STEPS.TIPO_USUARIO, STEPS.GRUPO_COMPONENTE, STEPS.GRUPO_REGENTE, STEPS.CRIAR_GRUPO].includes(nextStep)
     ) {
       animateTo(STEPS.REVISAR);
       return;
@@ -144,24 +144,19 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
     // Não faz nada — só "Sim" prossegue
   };
 
-  const handleHinarioNext = () => goNext(STEPS.IGREJA);
+  const handleHinarioNext = () => goNext(STEPS.TIPO_USUARIO);
 
-  const handleIgrejaNext = () => goNext(STEPS.TIPO_USUARIO);
+  const handleTipoUsuarioNext = () => goNext(STEPS.IGREJA);
 
-  const handleCreateChurch = () => {
-    // Could navigate to a church creation screen
-    // For now, just go to tipo_usuario
-    goNext(STEPS.TIPO_USUARIO);
-  };
-
-  const handleTipoUsuarioNext = () => {
+  const handleIgrejaNext = () => {
+    // A igreja é a última etapa antes de escolher/entrar em um grupo.
     const userType = (data.userType || '').toLowerCase();
     if (userType === 'regente') {
       goNext(STEPS.GRUPO_REGENTE);
     } else if (userType === 'componente') {
       goNext(STEPS.GRUPO_COMPONENTE);
     } else {
-      // cantor or midia — skip grupo selection
+      // adorador ou mídia — pula a seleção de grupo
       goNext(STEPS.NOTIFICACOES);
     }
   };
@@ -366,23 +361,22 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
             onBack={() => goBack(STEPS.TERMOS)}
           />
         );
-      case STEPS.IGREJA:
-        return (
-          <SelecionarIgreja
-            value={data.igreja}
-            onChange={(v) => updateData({ igreja: v })}
-            onCreateChurch={handleCreateChurch}
-            onNext={handleIgrejaNext}
-            onBack={() => goBack(STEPS.HINARIO)}
-          />
-        );
       case STEPS.TIPO_USUARIO:
         return (
           <TipoUsuario
             value={data.userType}
             onChange={(v) => updateData({ userType: v })}
             onNext={handleTipoUsuarioNext}
-            onBack={() => goBack(STEPS.IGREJA)}
+            onBack={() => goBack(STEPS.HINARIO)}
+          />
+        );
+      case STEPS.IGREJA:
+        return (
+          <SelecionarIgreja
+            value={data.igreja}
+            onChange={(v) => updateData({ igreja: v })}
+            onNext={handleIgrejaNext}
+            onBack={() => goBack(STEPS.TIPO_USUARIO)}
           />
         );
       case STEPS.GRUPO_COMPONENTE:
@@ -425,7 +419,7 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
               } else if (data.userType === 'componente') {
                 goBack(STEPS.GRUPO_COMPONENTE);
               } else {
-                goBack(STEPS.TIPO_USUARIO);
+                goBack(STEPS.IGREJA);
               }
             }}
           />

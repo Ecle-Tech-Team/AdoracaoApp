@@ -13,6 +13,7 @@ import { Poppins_700Bold } from '@expo-google-fonts/poppins';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 
 export default function SelecionarIgreja({ value, onChange, onNext, onBack }) {
+  const SEM_IGREJA = 'Não tenho igreja vinculada';
   const [search, setSearch] = useState('');
   const [igrejas, setIgrejas] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +43,10 @@ export default function SelecionarIgreja({ value, onChange, onNext, onBack }) {
   const filtered = igrejas.filter((ig) =>
     ig.toLowerCase().includes(search.toLowerCase())
   );
+
+  // A opção "não tenho igreja" fica no header da lista; se o usuário
+  // digitou algo, ela é ignorada para não interferir na busca.
+  const showNoChurchOption = search.trim() === '';
 
   const handleNext = () => {
     if (!value) {
@@ -79,6 +84,33 @@ export default function SelecionarIgreja({ value, onChange, onNext, onBack }) {
           <FlatList
             data={filtered}
             keyExtractor={(item, index) => String(index)}
+            ListHeaderComponent={
+              !showNoChurchOption ? null : (
+              <TouchableOpacity
+                style={[
+                  styles.listItem,
+                  styles.noChurchItem,
+                  value === SEM_IGREJA && styles.listItemSelected,
+                ]}
+                onPress={() => onChange(SEM_IGREJA)}
+              >
+                <Feather
+                  name="slash"
+                  color={value === SEM_IGREJA ? '#FFCB69' : '#999'}
+                  size={18}
+                />
+                <Text
+                  style={[
+                    styles.listItemText,
+                    value === SEM_IGREJA && styles.listItemTextSelected,
+                  ]}
+                >
+                  {SEM_IGREJA}
+                </Text>
+                {value === SEM_IGREJA && <Text style={styles.checkIcon}>✓</Text>}
+              </TouchableOpacity>
+              )
+            }
             style={styles.list}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
@@ -99,7 +131,10 @@ export default function SelecionarIgreja({ value, onChange, onNext, onBack }) {
               </TouchableOpacity>
             )}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>Nenhuma igreja encontrada</Text>
+              <Text style={styles.emptyText}>
+                Nenhuma igreja encontrada. Você pode digitar o nome da sua igreja
+                ou seguir sem vínculo.
+              </Text>
             }
           />
         )}
@@ -169,6 +204,11 @@ const styles = StyleSheet.create({
   },
   listItemSelected: {
     backgroundColor: '#FFF9ED',
+  },
+  noChurchItem: {
+    borderWidth: 1,
+    borderColor: '#EEE',
+    backgroundColor: '#FAFAFA',
   },
   listItemText: {
     fontFamily: 'Nunito_400Regular',
