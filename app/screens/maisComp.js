@@ -1,40 +1,21 @@
 import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native'
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useContext } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { fetchComponentes, removeComponentFromGrupo } from '../../src/api/api';
+import { removeComponentFromGrupo } from '../../src/api/api';
 import { AuthContext } from '../../src/contexts/AuthContext';
-import { useOnboarding } from '../../src/contexts/OnboardingContext';
 
 export default function MaisComp({ navigateTo }) {
-  const [componentes, setComponentes] = useState([]);
-  const [idUser, setidUser] = useState(null);
-  const { id_grupo, user, logout } = useContext(AuthContext);
-  const { resetOnboarding } = useOnboarding();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetchComponentes(id_grupo); 
-        setComponentes(response);
-        const currentUser = response.find(user => user.tipo_usuario === 'Componente'); 
-        if (currentUser) setidUser(currentUser.id_usuario);
-      } catch (error) {
-        console.error('Erro ao buscar componentes:', error);
-      }
-    };
-    fetchData();
-  }, []);
-
+  const { user, logout, refreshUser } = useContext(AuthContext);
 
   const handleRemove = async () => {
-    if (!idUser) return console.error('ID do usuário não encontrado.');
+    if (!user?.id_user) return console.error('ID do usuário não encontrado.');
 
     try {
       const response = await removeComponentFromGrupo(user.id_user);
       if (response) {
-        setComponentes(prevState => prevState.filter(comp => comp.id_usuario !== idUser));
-        logout();        
+        await refreshUser();
+        Alert.alert('Você saiu do grupo');
       } else {
         console.error('Erro ao remover componente');
       }
@@ -78,7 +59,7 @@ export default function MaisComp({ navigateTo }) {
               <Text style={styles.itemText}>Mudar Hinário</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => { logout(); resetOnboarding(); }} style={styles.item} activeOpacity={0.7}>
+            <TouchableOpacity onPress={logout} style={styles.item} activeOpacity={0.7}>
               <Text style={styles.itemText}>Encerrar Sessão</Text>
             </TouchableOpacity>
           </View>

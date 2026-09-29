@@ -80,7 +80,9 @@ export default function Revisar({
     },
     {
       label: 'Tipo de Usuário',
-      value: data.userType ? data.userType.charAt(0).toUpperCase() + data.userType.slice(1) : '',
+      value: data.aguardandoConviteGrupo
+        ? 'Adorador (aguardando inclusão no grupo)'
+        : (data.userType ? data.userType.charAt(0).toUpperCase() + data.userType.slice(1) : ''),
       icon: 'users',
       onEdit: onEditTipoUsuario,
     },

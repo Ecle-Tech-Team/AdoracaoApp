@@ -14,7 +14,6 @@ import { Poppins_700Bold } from "@expo-google-fonts/poppins";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AuthContext } from "../../src/contexts/AuthContext";
 import { userLogin } from "../../src/api/api";
-import { registerForPushNotifications } from "../../src/services/notificationService";
 
 export default function Login({ navigateTo }) {
   const { login } = useContext(AuthContext);
@@ -37,22 +36,8 @@ export default function Login({ navigateTo }) {
 
     try {
       const response = await userLogin({ email, password });
-      const { token, id_user, userType, id_grupo } = response;
-
-      if (token && id_user && userType) {
-        try {
-          await registerForPushNotifications(id_user);
-        } catch (pushError) {
-          console.warn("Erro ao registrar push notification:", pushError);
-        }
-
-        login({
-          token,
-          id_user,
-          userType,
-          id_grupo: id_grupo || null,
-        });
-
+      if ((response.accessToken || response.token) && (response.user || response.id_user)) {
+        await login(response);
         navigateTo("Dashboard");
       } else {
         Alert.alert("Erro", "Token ou tipo de usuário ausente. Verifique as credenciais.");

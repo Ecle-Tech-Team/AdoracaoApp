@@ -3,12 +3,10 @@ import React, { useContext, useState, useEffect } from 'react'
 import { useFonts, Nunito_500Medium } from '@expo-google-fonts/nunito';
 import { Poppins_700Bold, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
 import { AuthContext } from '../../src/contexts/AuthContext';
-import { useOnboarding } from '../../src/contexts/OnboardingContext';
 import api from '../../src/api/api';
 
 export default function MaisReg({ navigateTo }) {
-  const { logout, id_grupo, user, updateUser } = useContext(AuthContext);
-  const { resetOnboarding } = useOnboarding();
+  const { logout, id_grupo, user, refreshUser } = useContext(AuthContext);
   const [grupoInfo, setGrupoInfo] = useState(null);
 
   useEffect(() => {
@@ -39,7 +37,7 @@ export default function MaisReg({ navigateTo }) {
             try {
               await api.delete(`/grupo/${id_grupo}`, { data: { regenteId: user?.id_user } });
               setGrupoInfo(null);
-              await updateUser({ userType: 'Adorador', id_grupo: null });
+              await refreshUser();
               Alert.alert('Você saiu do grupo');
             } catch (e) {
               console.log('Erro ao sair do grupo:', e);
@@ -92,7 +90,7 @@ export default function MaisReg({ navigateTo }) {
               <Text style={styles.txt}>Mudar Hinário</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => { logout(); resetOnboarding(); }} style={styles.item} activeOpacity={0.7}>
+            <TouchableOpacity onPress={logout} style={styles.item} activeOpacity={0.7}>
               <Text style={styles.txt}>Encerrar Sessão</Text>
             </TouchableOpacity>
           </View>
