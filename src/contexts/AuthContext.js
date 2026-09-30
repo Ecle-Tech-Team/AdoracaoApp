@@ -70,6 +70,7 @@ export const AuthProvider = ({ children }) => {
 
   const saveGrupoId = (id) => updateUser({ id_grupo: id });
   const id_grupo = session.user?.id_grupo ?? null;
+  const id_igreja = session.user?.id_igreja ?? null;
 
   return (
     <AuthContext.Provider value={{
@@ -78,6 +79,9 @@ export const AuthProvider = ({ children }) => {
       isLoading: session.status === 'loading',
       isOfflineCached: session.status === 'offline-cached',
       id_grupo,
+      id_igreja,
+      id_user: session.user?.id_user ?? null,
+      userType: session.user?.userType ?? null,
       login,
       completeLogin,
       logout,
