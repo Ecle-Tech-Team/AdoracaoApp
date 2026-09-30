@@ -1,82 +1,90 @@
-import React, { createContext, useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useEffect, useState } from 'react';
+import { getCurrentUser, revokeSession } from '../api/api';
+import {
+  getAccessToken,
+  getRefreshToken,
+  getSession,
+  hydrateSession,
+  publishSession,
+  saveSession,
+  saveUser,
+  setOfflineCached,
+  subscribeSession,
+} from '../services/sessionStore';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);  
-  const [id_grupo, setGrupoId] = useState(null);
+  const [session, setSession] = useState(getSession);
 
   useEffect(() => {
-    const loadUser = async () => {
-      const token = await AsyncStorage.getItem('userToken');
-      const id_user = await AsyncStorage.getItem('userId');
-      const userType = await AsyncStorage.getItem('userType');
-      const storageidGrupo = await AsyncStorage.getItem('grupoId');
-      
-      if (token && id_user && userType ) {
-        setUser({ 
-          token, 
-          id_user: Number(id_user), 
-          userType 
-        });
-      }      
-      if (storageidGrupo) {
-        setGrupoId(Number(storageidGrupo)); 
+    const unsubscribe = subscribeSession(setSession);
+    const restore = async () => {
+      try {
+        const stored = await hydrateSession();
+        if (getAccessToken() || getRefreshToken()) {
+          await getCurrentUser();
+        }
+      } catch (error) {
+        // An unavailable API must not destroy a locally cached session.
+        if (!error.response || error.response.status >= 500) setOfflineCached();
       }
-
     };
-
-    loadUser();
+    restore();
+    return unsubscribe;
   }, []);
 
-  const login = async ({ token, id_user, userType, id_grupo }) => {
-    await AsyncStorage.setItem('userToken', token);
-    await AsyncStorage.setItem('userId', id_user.toString());;
-    await AsyncStorage.setItem('userType', userType);
-    if (id_grupo) {
-      await AsyncStorage.setItem('grupoId', id_grupo.toString());
-      setGrupoId(id_grupo);
-    }    setUser({ token, id_user, userType });
-    
-  };
-
-
-  const logout = () => {
-    setUser(null);
-    AsyncStorage.removeItem('userToken');
-    AsyncStorage.removeItem('userId');
-    AsyncStorage.removeItem('userType');
-    AsyncStorage.removeItem('grupoId');
-  };
-
-  const saveGrupoId = async (id) => {
+  const login = async (response, { deferPublish = false, skipIdentityRefresh = false } = {}) => {
+    const authenticatedUser = await saveSession(response, { notify: !deferPublish });
+    if (skipIdentityRefresh) return authenticatedUser;
     try {
-      await AsyncStorage.setItem('grupoId', id.toString());
-      setGrupoId(id);
+      return await getCurrentUser({ notify: !deferPublish });
     } catch (error) {
-      console.error('Erro ao salvar grupoId no AsyncStorage:', error);
+      if (error.response && error.response.status < 500) throw error;
+      setOfflineCached();
+      return authenticatedUser;
     }
   };
+
+  const logout = async () => {
+    try {
+      await revokeSession();
+    } catch (error) {
+      // revokeSession always clears the device session, even when offline.
+      console.warn('Não foi possível revogar a sessão no servidor:', error.message);
+    }
+  };
+
+  const refreshUser = (options) => getCurrentUser(options);
+  const completeLogin = () => publishSession();
 
   const updateUser = async (updates) => {
-    if (updates.userType) {
-      await AsyncStorage.setItem('userType', updates.userType);
+    const updated = await saveUser({ ...session.user, ...updates });
+    try {
+      return await refreshUser();
+    } catch (error) {
+      if (!error.response || error.response.status >= 500) return updated;
+      throw error;
     }
-    if (updates.id_grupo !== undefined) {
-      if (updates.id_grupo) {
-        await AsyncStorage.setItem('grupoId', updates.id_grupo.toString());
-        setGrupoId(updates.id_grupo);
-      } else {
-        await AsyncStorage.removeItem('grupoId');
-        setGrupoId(null);
-      }
-    }
-    setUser(prev => ({ ...prev, ...updates }));
-  };  
+  };
+
+  const saveGrupoId = (id) => updateUser({ id_grupo: id });
+  const id_grupo = session.user?.id_grupo ?? null;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, setGrupoId, id_grupo, saveGrupoId, updateUser }}>
+    <AuthContext.Provider value={{
+      user: session.user,
+      status: session.status,
+      isLoading: session.status === 'loading',
+      isOfflineCached: session.status === 'offline-cached',
+      id_grupo,
+      login,
+      completeLogin,
+      logout,
+      refreshUser,
+      saveGrupoId,
+      updateUser,
+    }}>
       {children}
     </AuthContext.Provider>
   );

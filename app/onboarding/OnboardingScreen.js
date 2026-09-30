@@ -47,7 +47,7 @@ const STEPS = {
 
 export default function OnboardingScreen({ onComplete, navigateTo }) {
   const { data, updateData, completeOnboarding } = useOnboarding();
-  const { login } = useContext(AuthContext);
+  const { login, logout, refreshUser, completeLogin } = useContext(AuthContext);
   const { trocarHinario } = useContext(HinarioContext);
   const [step, setStep] = useState(STEPS.WELCOME);
   const [emailError, setEmailError] = useState('');
@@ -162,6 +162,11 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
   };
 
   const handleGrupoComponenteNext = () => {
+    updateData({ aguardandoConviteGrupo: true });
+    Alert.alert(
+      'Inclusão pelo responsável',
+      'Sua conta será criada como Adorador. Depois, peça ao líder ou responsável do grupo para adicionar você diretamente ao grupo selecionado.'
+    );
     goNext(STEPS.NOTIFICACOES);
   };
   const handleGrupoRegenteNext = () => {
@@ -211,18 +216,25 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
       // Converte data para formato MySQL (YYYY-MM-DD)
       const birthDateISO = data.birthDate ? new Date(data.birthDate).toISOString().split('T')[0] : null;
 
+      const aguardandoConviteGrupo = userTypeCapitalized === 'Componente' && Boolean(data.grupoId);
       const payload = {
         name: data.nome,
         email: data.email,
         password: data.password,
         birthDate: birthDateISO,
-        typeUser: userTypeCapitalized,
+        // Membership is granted by a group leader after registration; a
+        // selected group must never turn into a client-side self-assignment.
+        typeUser: aguardandoConviteGrupo ? 'Adorador' : userTypeCapitalized,
         hinario: hinarioMap[data.hinario] || 'HARPA',
         igreja: data.igreja || data.igrejaCriada || '',
-        grupo: data.grupo || data.nomeGrupo || '',
       };
 
       await registerUser(payload);
+      if (aguardandoConviteGrupo) {
+        // Keep the name for the review text, but do not retain an ID that can
+        // be mistaken for an authenticated group membership.
+        updateData({ grupoId: null, aguardandoConviteGrupo: true });
+      }
 
       // Salva preferência de hinário no contexto
       if (hinarioMap[data.hinario]) {
@@ -254,33 +266,46 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
     try {
       // Faz login automático via API
       const loginResponse = await userLogin({ email: data.email, password: data.password });
-      const { token, id_user, userType, id_grupo } = loginResponse;
-      let grupoId = id_grupo;
+      const authenticatedUser = await login(loginResponse, {
+        deferPublish: true,
+        skipIdentityRefresh: true,
+      });
+      const id_user = authenticatedUser.id_user;
 
-      // Se tem grupo pendente pra criar (regente), cria agora com o id_user
+      // A criação do grupo vincula o regente no servidor. Não há associação
+      // manual de id_grupo no cliente.
       if (data.pendenteCriarGrupo) {
         try {
           const tipoGrupo = data.tipoGrupo === 'Louvor' ? 'Louvor' : 'Musical';
           const local = data.localGrupo || data.igrejaGrupo || '';
           const grupoCriado = await createGrupo(data.nomeGrupo, local, tipoGrupo, id_user);
-          grupoId = grupoCriado?.grupoId || grupoCriado?.id_grupo || grupoCriado?.id || null;
+          if (!(grupoCriado?.grupoId || grupoCriado?.id_grupo || grupoCriado?.id)) {
+            throw new Error('A API não retornou o identificador do grupo criado.');
+          }
         } catch (groupErr) {
           console.log('Erro ao criar grupo após login:', groupErr);
+          // The account exists, but do not leave a hidden authenticated
+          // partial setup. The user can retry from the final onboarding step.
+          await logout();
+          Alert.alert('Grupo não criado', 'Sua conta foi criada, mas não foi possível criar o grupo. Tente novamente.');
+          return;
         }
-      }
 
-      await login({ token, id_user, userType, id_grupo: grupoId });
-
-      // Se um grupo foi criado/capturado após o login, atualiza o id_grupo no backend
-      if (grupoId && !id_grupo) {
         try {
-          await api.put(`/user/${id_user}/grupo`, { id_grupo: grupoId });
-        } catch (updateErr) {
-          console.log('Erro ao vincular usuário ao grupo:', updateErr);
+          await refreshUser({ notify: false });
+        } catch (refreshError) {
+          console.log('Grupo criado, mas não foi possível atualizar a identidade:', refreshError);
+          // The server has already created the group. Signing out avoids
+          // publishing the pre-creation profile as the source of truth.
+          await completeOnboarding();
+          await logout();
+          Alert.alert('Grupo criado', 'O grupo foi criado, mas sua sessão não pôde ser atualizada. Entre novamente para continuar.');
+          return;
         }
       }
 
       await completeOnboarding();
+      completeLogin();
       if (onComplete) onComplete();
     } catch (err) {
       console.log('Erro no login automático:', err?.response?.data || err.message);
@@ -365,7 +390,14 @@ export default function OnboardingScreen({ onComplete, navigateTo }) {
         return (
           <TipoUsuario
             value={data.userType}
-            onChange={(v) => updateData({ userType: v })}
+            onChange={(v) => updateData({
+              userType: v,
+              ...(v !== 'Componente' ? {
+                grupoId: null,
+                grupo: '',
+                aguardandoConviteGrupo: false,
+              } : {}),
+            })}
             onNext={handleTipoUsuarioNext}
             onBack={() => goBack(STEPS.HINARIO)}
           />

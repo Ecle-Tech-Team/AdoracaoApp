@@ -15,7 +15,6 @@ import {
 import * as Notifications from "expo-notifications";
 import { fetchNotificacoes, marcarComoLida } from "../../src/api/api";
 import { AuthContext } from "../../src/contexts/AuthContext";
-import { registerForPushNotifications } from "../../src/services/notificationService";
 import { notifyNotificationsUpdated, subscribeToNotifications } from "../../src/services/notificationEvents";
 
 export default function Notificacoes() {
@@ -24,9 +23,6 @@ export default function Notificacoes() {
 
   useEffect(() => {
     carregarNotificacoes();
-
-    // Registrar para notificações push
-    registerForPushNotifications(user?.id_user || null);
 
     // Se inscrever para atualizações de notificações
     const unsubscribe = subscribeToNotifications(carregarNotificacoes);

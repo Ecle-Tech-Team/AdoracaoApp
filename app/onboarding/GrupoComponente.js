@@ -56,6 +56,9 @@ export default function GrupoComponente({ value, onChange, onNext, onBack }) {
         <Text style={styles.title}>
           Qual é o grupo que você{'\n'}faz parte?
         </Text>
+        <Text style={styles.inviteNotice}>
+          Após o cadastro, o líder ou responsável do grupo deve adicionar você diretamente.
+        </Text>
 
         <View style={styles.searchContainer}>
           <Feather name="search" color="#aaa" size={20} />
@@ -151,6 +154,12 @@ const styles = StyleSheet.create({
     color: '#1a1a2e',
     marginBottom: 24,
     marginTop: 8,
+  },
+  inviteNotice: {
+    fontFamily: 'Nunito_500Medium',
+    color: '#666',
+    fontSize: 14,
+    marginBottom: 18,
   },
   searchContainer: {
     flexDirection: 'row',

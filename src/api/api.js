@@ -1,4 +1,14 @@
 import axios from 'axios';
+import {
+  clearSession,
+  getAccessToken,
+  getRefreshToken,
+  saveSession,
+  saveUser,
+  setAuthenticated,
+  setOfflineCached,
+  shouldRefreshAccessToken,
+} from '../services/sessionStore';
 
 // Usa EXPO_PUBLIC_API_URL quando definida (eas.json / .env).
 // O fallback é o backend local acessível via Tailscale (dev PC + celular na mesma tailnet).
@@ -6,6 +16,89 @@ const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3333',
   timeout: 10000
 });
+
+const authApi = axios.create({ baseURL: api.defaults.baseURL, timeout: api.defaults.timeout });
+let refreshPromise = null;
+
+const refreshAccessToken = () => {
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      const token = getRefreshToken();
+      if (!token) throw new Error('Sessão sem token de atualização');
+      try {
+        const response = await authApi.post('/auth/refresh', { refreshToken: token, clientType: 'mobile' });
+        if (getRefreshToken() !== token) throw new Error('Sessão alterada durante a atualização');
+        await saveSession(response.data);
+        return getAccessToken();
+      } catch (error) {
+        if ([400, 401, 403].includes(error.response?.status) && getRefreshToken() === token) {
+          await clearSession();
+        } else if (!error.response || error.response.status >= 500) {
+          setOfflineCached();
+        }
+        throw error;
+      }
+    })().finally(() => { refreshPromise = null; });
+  }
+  return refreshPromise;
+};
+
+api.interceptors.request.use(async (config) => {
+  if (shouldRefreshAccessToken()) await refreshAccessToken();
+  const token = getAccessToken();
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
+
+api.interceptors.response.use(
+  (response) => {
+    setAuthenticated();
+    return response;
+  },
+  async (error) => {
+    const request = error.config;
+    if (!error.response) setOfflineCached();
+    if (error.response?.status === 401 && request && request._authRetried) {
+      if (request.url === '/auth/me') await clearSession();
+      return Promise.reject(error);
+    }
+    if (error.response?.status === 401 && request && !request._authRetried) {
+      request._authRetried = true;
+      const currentToken = getAccessToken();
+      if (currentToken && request.headers.Authorization !== `Bearer ${currentToken}`) {
+        request.headers.Authorization = `Bearer ${currentToken}`;
+        return api(request);
+      }
+      if (getRefreshToken()) {
+        const token = await refreshAccessToken();
+        request.headers.Authorization = `Bearer ${token}`;
+        return api(request);
+      }
+      if (getAccessToken()) await clearSession();
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const getCurrentUser = async (options) => {
+  const response = await api.get('/auth/me');
+  return saveUser(response.data, options);
+};
+
+export const revokeSession = async () => {
+  const refreshToken = getRefreshToken();
+  try {
+    let token = getAccessToken();
+    if (refreshToken && shouldRefreshAccessToken()) token = await refreshAccessToken();
+    if (token) {
+      await authApi.post('/auth/logout', undefined, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    }
+  } finally {
+    await clearSession();
+  }
+};
 
 /* =========================
   AUTH
@@ -17,7 +110,7 @@ export const registerUser = async (userData) => {
 };
 
 export const userLogin = async (loginUser) => {
-  const response = await api.post('/login', loginUser);
+  const response = await authApi.post('/login', { ...loginUser, clientType: 'mobile' });
   return response.data;
 };
 
@@ -127,6 +220,8 @@ export const fetchComponentes = async (id_grupo) => {
   return response.data;
 };
 
+// The API derives the authenticated member's current group and resets the
+// role; no client-supplied group ID is accepted for a self-leave operation.
 export const removeComponentFromGrupo = async (idUser) => {
   const response = await api.put(`/user/removeComponente/${idUser}`);
   return response.data;

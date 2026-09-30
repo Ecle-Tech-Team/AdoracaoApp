@@ -34,7 +34,7 @@ export default function CriarGrupo({ navigateTo}) {
 
         const newGrupoId = response.data.grupoId;
         console.log("Novo grupoId recebido:", newGrupoId);
-        saveGrupoId(newGrupoId);  
+        await saveGrupoId(newGrupoId);
         console.log('saveGrupoId:', saveGrupoId);
 
         Alert.alert('Sucesso', response.data.message);
@@ -166,4 +166,3 @@ export default function CriarGrupo({ navigateTo}) {
         borderRadius: 5
       },
   });
-  

@@ -1,6 +1,5 @@
-import { View, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import React, { useState, useEffect, useContext } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { AuthProvider, AuthContext } from '../src/contexts/AuthContext';
 import { OnboardingProvider, OnboardingContext } from '../src/contexts/OnboardingContext';
@@ -42,10 +41,10 @@ import Componentes from './screens/componentes';
 import AdicionarComp from './screens/adicionarComp';
 import Notificacoes from './screens/notificacoes';
 import MinhaBiblioteca from './screens/MinhaBiblioteca';
-import MenuInferiorAdorador from './components/MenuInferior';
+import MenuInferior from './components/MenuInferior';
 import MenuInferiorReg from './components/MenuInferiorReg';
 import MenuInferiorComp from './components/MenuInferiorComp';
-import MenuSuperiorAdorador from './components/MenuSuperior';
+import MenuSuperior from './components/MenuSuperior';
 import MenuSuperiorGrupo from './components/MenuSuperiorGrupo';
 import AdicionarEnsaio from './screens/adicionarEnsaio';
 import AdicionarEvento from './screens/adicionarEvento';
@@ -53,20 +52,32 @@ import AdicionarEvento from './screens/adicionarEvento';
 const userScreens = {
   Adorador: {
     dashboard: Dashboard,
-    menuSuperior: MenuSuperiorAdorador,
-    menuInferior: MenuInferiorAdorador,
+    menuSuperior: MenuSuperior,
+    menuInferior: MenuInferior,
+    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection, MinhaBiblioteca],
+  },
+  Midia: {
+    dashboard: Dashboard,
+    menuSuperior: MenuSuperior,
+    menuInferior: MenuInferior,
+    screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection, MinhaBiblioteca],
+  },
+  'Mídia': {
+    dashboard: Dashboard,
+    menuSuperior: MenuSuperior,
+    menuInferior: MenuInferior,
     screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection, MinhaBiblioteca],
   },
   Músico: {
     dashboard: Dashboard,
-    menuSuperior: MenuSuperiorAdorador,
-    menuInferior: MenuInferiorAdorador,
+    menuSuperior: MenuSuperior,
+    menuInferior: MenuInferior,
     screens: [Adoracao, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection, MinhaBiblioteca],
   },
   Cantor: {
     dashboard: DashboardCantor,
-    MenuSuperior: MenuSuperiorAdorador,
-    menuInferior: MenuInferiorAdorador,
+    MenuSuperior: MenuSuperior,
+    menuInferior: MenuInferior,
     screens: [EventosCantor, Harpa, Hino, Hinario, HinoGeral, Pesquisa, Favoritos, Mais, Notificacoes, MudarHinario, HymnsSection, MinhaBiblioteca],
   },
   Regente: {
@@ -84,7 +95,7 @@ const userScreens = {
 };
 
 function Page() {
-  const { user } = useContext(AuthContext);
+  const { user, isLoading, isOfflineCached } = useContext(AuthContext);
   const { onboardingComplete } = useContext(OnboardingContext);
   const [currentScreen, setCurrentScreen] = useState('Dashboard');
   const [previousScreen, setPreviousScreen] = useState(null);
@@ -100,16 +111,6 @@ function Page() {
     setCurrentScreen(screen);
   };
 
-  const handleLogin = async (userToken, userType) => {
-    try {
-      await AsyncStorage.setItem('userToken', userToken);
-      await AsyncStorage.setItem('userType', userType);
-      setCurrentScreen('Dashboard');
-    } catch (error) {
-      console.error('Erro ao salvar token de login:', error);
-    }
-  };
-
   const goToLogin = async (screen) => {
     setCurrentScreen(screen || 'Login');
   };
@@ -118,26 +119,16 @@ function Page() {
     setCurrentScreen('Onboarding');
   };
 
-  const handleLogout = async () => {
-    try {
-      await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem('userType');
-      setCurrentScreen('Login');
-    } catch (error) {
-      console.error('Erro ao fazer logout:', error);
-    }
-  };
-
   const userType = user?.userType;
   const { dashboard: DashboardComponent, menuInferior: MenuInferiorComponent, menuSuperior: MenuSuperiorComponent } = userScreens[userType] || {};
 
   let ScreenComponent;
 
+  if (isLoading || onboardingComplete === null) {
+    return <View style={styles.container} />;
+  }
+
   if (!user) {
-    if (onboardingComplete === null) {
-      // Still loading
-      return <View style={styles.container} />;
-    }
     // Primeiro acesso: nunca completou onboarding
     if (!onboardingComplete && currentScreen !== 'Login' && currentScreen !== 'Cadastro') {
       return <OnboardingScreen navigateTo={goToLogin} />;
@@ -157,6 +148,7 @@ function Page() {
   return (
     <View style={styles.container}>
       {user && MenuSuperiorComponent && <MenuSuperiorComponent navigateTo={navigateTo} />}
+      {isOfflineCached && <Text style={{ textAlign: 'center', color: '#725500' }}>Sem conexão. Exibindo dados salvos.</Text>}
       <View style={styles.content}>
         <ScreenComponent
           navigateTo={navigateTo}
@@ -164,8 +156,6 @@ function Page() {
           previousScreen={previousScreen}
           selectedHinoGeral={selectedHinoGeral}
           editData={editData}
-          onLogin={handleLogin}
-          onLogout={handleLogout}
         />
       </View>
       {user && MenuInferiorComponent && <MenuInferiorComponent navigateTo={navigateTo} />}
@@ -174,7 +164,7 @@ function Page() {
 }
 
 function AppWrapper() {
-  const { user } = useContext(AuthContext);
+  const { user, status } = useContext(AuthContext);
 
   useEffect(() => {
     // Configurar handler de notificações
@@ -190,14 +180,14 @@ function AppWrapper() {
     const removeListener = setupNotificationListener();
 
     // Configurar notificações quando o app inicia e o usuário está disponível
-    if (user?.id_user) {
+    if (status === 'authenticated' && user?.id_user) {
       registerForPushNotifications(user.id_user);
     }
 
     return () => {
       removeListener();
     };
-  }, [user]);
+  }, [user?.id_user, status]);
 
   return <Page />;
 }
