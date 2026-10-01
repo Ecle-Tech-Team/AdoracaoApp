@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 
 const PROFILE_KEY = '@auth_profile';
 const REFRESH_KEY = 'auth_refresh_token';
-const LEGACY_KEYS = ['userToken', 'userId', 'userType', 'grupoId'];
+const LEGACY_KEYS = ['userToken', 'userId', 'userType', 'grupoId', 'userChurchId'];
 
 let accessToken = null;
 let accessExpiresAt = null;
@@ -35,10 +35,13 @@ export const normalizeUser = (source, fallback = null) => {
   const userType = value.userType ?? value.typeUser ?? value.tipo_usuario ?? value.tipoUsuario ?? value.role ?? previous.userType;
   const groupKey = ['id_grupo', 'grupoId', 'groupId'].find((key) => Object.prototype.hasOwnProperty.call(value, key));
   const id_grupo = groupKey ? value[groupKey] : previous.id_grupo ?? null;
+  const churchKey = ['id_igreja', 'userChurchId'].find((key) => Object.prototype.hasOwnProperty.call(value, key));
+  const id_igreja = churchKey ? value[churchKey] : previous.id_igreja ?? null;
   if (!id_user || !userType) return null;
   const { token, accessToken, refreshToken, password, ...safeValue } = value;
   const { token: oldToken, accessToken: oldAccess, refreshToken: oldRefresh, password: oldPassword, ...safePrevious } = previous;
-  return { ...safePrevious, ...safeValue, id_user: Number(id_user), userType, id_grupo: id_grupo ? Number(id_grupo) : null };
+  return { ...safePrevious, ...safeValue, id_user: Number(id_user), userType,
+    id_grupo: id_grupo ? Number(id_grupo) : null, id_igreja: id_igreja ? Number(id_igreja) : null };
 };
 
 export const userFromResponse = (data, fallback = null) => {
@@ -60,6 +63,7 @@ export const hydrateSession = async () => {
     id_user: stored.userId,
     userType: stored.userType,
     id_grupo: stored.grupoId,
+    id_igreja: stored.userChurchId,
   });
   accessToken = stored.userToken || null;
   accessExpiresAt = null;
